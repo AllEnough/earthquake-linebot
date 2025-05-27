@@ -36,8 +36,12 @@ def webhook():
     except Exception as e:
         print("Webhook 驗證錯誤：", e)
         abort(400)
+    print("📥 收到 LINE 請求！")
+    print("📝 請求內容：", body)
+
 
     for event in events:
+        print("🔥 LINE Event 收到：", event)
         if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
             user_id = event.source.user_id
             user_message = event.message.text
