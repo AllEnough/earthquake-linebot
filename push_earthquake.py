@@ -11,6 +11,9 @@ USER_ID = "U7a28ed369cc94af4c0ff6f811b59e2ad"
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 
 def push_message(text):
+    message = TextMessage(text="🎉 測試訊息 from Railway 雲端！")
+    line_bot_api.push_message(to=USER_ID, messages=[message])
+
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
         try:
