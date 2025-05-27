@@ -56,7 +56,7 @@ def handle_webhook():
                             magnitude_filter = float(match.group(2)) if match.group(2) else None
 
                         if location_keyword:
-                            query['epicenter'] = {'$regex': location_keyword}
+                            query['location'] = {'$regex': location_keyword}
 
                         if magnitude_filter:
                             query['magnitude'] = {'$gte': magnitude_filter}
@@ -67,7 +67,7 @@ def handle_webhook():
                         if results:
                             lines = [f"📚 查詢結果："]
                             for idx, quake in enumerate(results, start=1):
-                                lines.append(f"{idx}️⃣ {quake['origin_time']} / {quake['epicenter']} / 芮氏 {quake['magnitude']}")
+                                lines.append(f"{idx}️⃣ {quake['origin_time']} / {quake['location']} / 芮氏 {quake['magnitude']}")
                             reply_text = "\n".join(lines)
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
