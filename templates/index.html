@@ -39,10 +39,7 @@
         </tr>
         {% for quake in quakes %}
         <tr>
-            <td>{{ quake.origin_time }}</td>
-            <td>{{ quake.epicenter or '無資料' }}</td>
-            <td>{{ quake.depth }}</td>
-            <td>{{ quake.magnitude }}</td>
+            {{ quake }}
         </tr>
         {% endfor %}
     </table>
