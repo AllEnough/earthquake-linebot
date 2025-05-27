@@ -1,1 +1,1 @@
-worker: python push_earthquake.py
+start: python push_earthquake.py
