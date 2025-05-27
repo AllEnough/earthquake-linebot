@@ -21,7 +21,7 @@ configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(channel_secret=LINE_CHANNEL_SECRET)
 
 # MongoDB Config
-MONGO_URI = "mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_URI = "mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true"
 client = MongoClient(MONGO_URI)
 db = client["linebot"]
 collection = db["users"]
@@ -48,7 +48,7 @@ def webhook():
 
                 result = collection.update_one(
                     {'user_id': user_id},
-                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC)}},
+                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC), 'message': user_message}},
                     upsert=True
                 )
 
