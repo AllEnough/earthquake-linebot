@@ -73,11 +73,11 @@ def handle_webhook():
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
 
-                        reply = ReplyMessageRequest(
-                            reply_token=event.reply_token,
-                            messages=[TextMessage(text=reply_text)]
-                        )
-                        line_bot_api.reply_message(reply)
+                    reply = ReplyMessageRequest(
+                        reply_token=event.reply_token,
+                        messages=[TextMessage(text=reply_text)]
+                    )
+                    line_bot_api.reply_message(reply)
 
     except Exception as e:
         print("❌ 處理訊息時發生錯誤：", e)
