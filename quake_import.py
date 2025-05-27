@@ -8,8 +8,7 @@ MONGO_URI = "mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net
 
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=5000)
 collection = collection = client['earthquake_db']['earthquakes']
-latest = collection.find_one(sort=[('origin_time', -1)])
-print(latest)
+
 
 def fetch_and_store_earthquake_data():
     url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0016-001?Authorization={API_KEY}'
