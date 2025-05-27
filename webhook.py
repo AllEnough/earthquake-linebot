@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 
 # LINE Config
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
+LINE_CHANNEL_SECRET = '7f9ee0dad7c79de9ed2305004c1e090e'
 
 if not LINE_CHANNEL_SECRET:
     print("❌ LINE_CHANNEL_SECRET 未正確設定！請檢查 Railway 環境變數")
