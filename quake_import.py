@@ -28,7 +28,7 @@ def fetch_and_store_earthquake_data():
             info = eq['EarthquakeInfo']
             quake = {
                 'origin_time': info['OriginTime'],
-                'location': info['Epicenter']['Location'],
+                'epicenter': info['Epicenter']['Location'],
                 'depth': info['FocalDepth'],
                 'magnitude': info['EarthquakeMagnitude']['MagnitudeValue'],
                 'report': eq['ReportContent'],

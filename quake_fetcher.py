@@ -13,7 +13,7 @@ def get_latest_quake():
         info = eq['EarthquakeInfo']
         return {
             'origin_time': info['OriginTime'],
-            'location': info['Epicenter']['Location'],
+            'epicenter': info['Epicenter']['Location'],
             'depth': info['FocalDepth'],
             'magnitude': info['EarthquakeMagnitude']['MagnitudeValue'],
             'report': eq['ReportContent'],

@@ -26,7 +26,7 @@ def quake_check_loop():
 
                 msg = f"""📢 新地震速報！
 時間：{quake['origin_time']}
-地點：{quake['location']}
+地點：{quake['epicenter']}
 深度：{quake['depth']} 公里
 規模：{quake['magnitude']} 芮氏
 ➡️ 詳情：{quake['link']}
