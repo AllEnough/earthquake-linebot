@@ -1,7 +1,7 @@
 from flask import Flask, request, abort
 from linebot.v3.webhook import WebhookParser
 from linebot.v3.messaging import Configuration, MessagingApi, ApiClient
-from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
+from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest, PushMessageRequest
 from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 
 from pymongo import MongoClient
@@ -13,9 +13,6 @@ app = Flask(__name__)
 
 # LINE Config
 LINE_CHANNEL_SECRET = '7f9ee0dad7c79de9ed2305004c1e090e'
-if not LINE_CHANNEL_SECRET:
-    print("❌ LINE_CHANNEL_SECRET 未正確設定！請檢查 Railway 環境變數")
-
 LINE_CHANNEL_ACCESS_TOKEN = 'p0Je4vYvQ5A3UhZbxMrqhex1gznrICRHBN7Kd3qcb87HegwHNCVDmqThV1I6VfDt1rsmTFUAiy+ykRXyjnGssJaZJ4Baoz0Z9YBZJ7NDO+K8XytQjxXFkz4TbQTSjhtqZQQX1E+TofEU99qLxLn6nAdB04t89/1O/w1cDnyilFU='
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
@@ -31,6 +28,34 @@ try:
     print("✅ 成功連線到 MongoDB")
 except Exception as e:
     print("❌ MongoDB 連線失敗：", e)
+
+# 推播函式：發送訊息給所有使用者
+def push_messages_to_all_users(collection, message_text):
+    try:
+        user_cursor = collection.find({}, {"user_id": 1})
+        user_ids = [user["user_id"] for user in user_cursor]
+
+        if not user_ids:
+            print("⚠️ 沒有使用者資料可推播")
+            return
+
+        with ApiClient(configuration) as api_client:
+            line_bot_api = MessagingApi(api_client)
+
+            for uid in user_ids:
+                try:
+                    line_bot_api.push_message(
+                        PushMessageRequest(
+                            to=uid,
+                            messages=[TextMessage(text=message_text)]
+                        )
+                    )
+                    print(f"✅ 已推播給使用者：{uid}")
+                except Exception as e:
+                    print(f"❌ 推播給 {uid} 失敗：", e)
+
+    except Exception as e:
+        print("❌ 推播時發生錯誤：", e)
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
@@ -63,12 +88,22 @@ def webhook():
                 else:
                     print(f"🌀 使用者已存在：{user_id}")
 
+                # ✅ 回覆訊息
                 with ApiClient(configuration) as api_client:
                     line_bot_api = MessagingApi(api_client)
-                    reply = ReplyMessageRequest(
-                        reply_token=event.reply_token,
-                        messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
-                    )
+
+                    if user_message.strip().lower() == "test":
+                        push_messages_to_all_users(collection, "🚨 這是測試地震推播訊息")
+                        reply = ReplyMessageRequest(
+                            reply_token=event.reply_token,
+                            messages=[TextMessage(text="✅ 已發送測試推播給所有人")]
+                        )
+                    else:
+                        reply = ReplyMessageRequest(
+                            reply_token=event.reply_token,
+                            messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
+                        )
+                    
                     line_bot_api.reply_message(reply)
 
     except Exception as e:
