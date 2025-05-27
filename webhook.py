@@ -54,7 +54,7 @@ def push_messages_to_all_users(message_text):
             for user_id in user_ids:
                 push_message = PushMessageRequest(
                     to=user_id,
-                    messages=[TextMessage(text=message_text)]
+                    messages=[TextMessage(text=str(message_text))]
                 )
                 messaging_api.push_message(push_message)
                 print(f"✅ 已推播訊息給 user_id: {user_id}")
