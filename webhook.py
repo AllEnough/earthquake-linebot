@@ -10,12 +10,11 @@ import os
 app = Flask(__name__)
 
 # LINE Config
-LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 
 if not LINE_CHANNEL_SECRET:
-    raise ValueError("❌ LINE_CHANNEL_SECRET 未正確設定！請檢查 Railway 環境變數")
-
+    print("❌ LINE_CHANNEL_SECRET 未正確設定！請檢查 Railway 環境變數")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(channel_secret=LINE_CHANNEL_SECRET)
