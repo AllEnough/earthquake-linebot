@@ -74,31 +74,7 @@ def handle_events(events):
 
     return 'OK'  # <=== 這要很快回應
 
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))  # Railway 會自動設定 PORT 環境變數
+    app.run(host="0.0.0.0", port=port)
 
-    # for event in events:
-    #     print("🔥 LINE Event 收到：", event)
-    #     if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
-    #         user_id = event.source.user_id
-    #         user_message = event.message.text
-
-    #         # ✅ 儲存使用者到 MongoDB
-    #         result = collection.update_one(
-    #             {'user_id': user_id},
-    #             {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
-    #             upsert=True
-    #         )
-
-    #         if result.upserted_id is not None:
-    #             print(f"✅ 新使用者註冊：{user_id}")
-    #         else:
-    #             print(f"🌀 使用者已存在：{user_id}")
-
-    #         with ApiClient(configuration) as api_client:
-    #             line_bot_api = MessagingApi(api_client)
-    #             reply = ReplyMessageRequest(
-    #                 reply_token=event.reply_token,
-    #                 messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
-    #             )
-    #             line_bot_api.reply_message(reply)
-
-    # return 'OK'
