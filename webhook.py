@@ -5,7 +5,7 @@ from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 
 from pymongo import MongoClient
-from datetime import datetime
+from datetime import datetime, UTC
 import os
 
 app = Flask(__name__)
@@ -48,7 +48,7 @@ def webhook():
 
                 result = collection.update_one(
                     {'user_id': user_id},
-                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
+                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC)}},
                     upsert=True
                 )
 
