@@ -63,3 +63,8 @@ def webhook():
                 line_bot_api.reply_message(reply)
 
     return 'OK'
+
+# 讓 Railway 正確啟動 port
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
