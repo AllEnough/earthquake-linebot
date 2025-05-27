@@ -30,7 +30,7 @@ collection = db["users"]
 def webhook():
     print("📥 收到 LINE 請求！")
 
-    signature = request.headers['X-Line-Signature', '']
+    signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
     print("📦 請求內容：", body)
 
