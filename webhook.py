@@ -47,6 +47,11 @@ def push_messages_to_all_users(message_text):
             messaging_api = MessagingApi(api_client)
 
             for user_id in user_ids:
+                # 保證訊息是 str 且使用 UTF-8 編碼
+                if isinstance(message_text, bytes):
+                    message_text = message_text.decode('utf-8')
+
+            for user_id in user_ids:
                 push_message = PushMessageRequest(
                     to=user_id,
                     messages=[TextMessage(text=message_text)]
