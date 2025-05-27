@@ -28,51 +28,49 @@ collection = db["users"]
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
-    print("📥 收到 LINE 請求！")
-
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers.get('X-Line-Signature', '')
     body = request.get_data(as_text=True)
+
+    print("📥 收到 LINE 請求！")
     print("📦 請求內容：", body)
 
     try:
         events = parser.parse(body, signature)
     except Exception as e:
-        print("Webhook 驗證錯誤：", e)
-        abort(400)
+        print("❌ Webhook 驗證失敗：", e)
+        return 'Signature verification failed', 400
 
-def handle_events(events):
-    for event in events:
-        print("🔥 收到事件：", event)
+    try:
+        for event in events:
+            if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
+                user_id = event.source.user_id
+                user_message = event.message.text
 
-        if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
-            user_id = event.source.user_id
-            user_message = event.message.text
-
-            result = collection.update_one(
-                {'user_id': user_id},
-                {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
-                upsert=True
-            )
-
-            if result.upserted_id is not None:
-                print(f"✅ 新使用者註冊：{user_id}")
-            else:
-                print(f"🌀 使用者已存在：{user_id}")
-
-            with ApiClient(configuration) as api_client:
-                line_bot_api = MessagingApi(api_client)
-                reply = ReplyMessageRequest(
-                    reply_token=event.reply_token,
-                    messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
+                result = collection.update_one(
+                    {'user_id': user_id},
+                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
+                    upsert=True
                 )
-                line_bot_api.reply_message(reply)
 
-    
-    # ✅ LINE 只等你幾秒就會斷線，請先回應 200 OK 再處理其他事情！
-    from threading import Thread
-    Thread(target=handle_events, args=(events,)).start()
+                if result.upserted_id is not None:
+                    print(f"✅ 新使用者註冊：{user_id}")
+                else:
+                    print(f"🌀 使用者已存在：{user_id}")
 
-    return 'OK'  # <=== 這要很快回應
+                with ApiClient(configuration) as api_client:
+                    line_bot_api = MessagingApi(api_client)
+                    reply = ReplyMessageRequest(
+                        reply_token=event.reply_token,
+                        messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
+                    )
+                    line_bot_api.reply_message(reply)
+
+    except Exception as e:
+        print("❌ 處理訊息時發生錯誤：", e)
+        return 'Error occurred', 500
+
+    return 'OK', 200
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))  # Railway 會自動設定 PORT 環境變數
