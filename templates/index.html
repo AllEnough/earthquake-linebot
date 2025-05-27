@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>地震資料查詢系統</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>近期地震資料</h1>
+    <table>
+        <tr>
+            <th>發生時間</th>
+            <th>震央</th>
+            <th>深度 (公里)</th>
+            <th>規模</th>
+        </tr>
+        {% for quake in quakes %}
+        <tr>
+            <td>{{ quake.origin_time }}</td>
+            <td>{{ quake.epicenter }}</td>
+            <td>{{ quake.depth }}</td>
+            <td>{{ quake.magnitude }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
