@@ -5,6 +5,7 @@ from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 
 from pymongo import MongoClient
+import certifi
 from datetime import datetime, UTC
 import os
 
@@ -21,10 +22,15 @@ configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(channel_secret=LINE_CHANNEL_SECRET)
 
 # MongoDB Config
-MONGO_URI = "mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true"
-client = MongoClient(MONGO_URI)
-db = client["linebot"]
-collection = db["users"]
+try:
+    MONGO_URI = "mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true"
+    client = MongoClient(MONGO_URI, tlsCAFile=certifi.where(), serverSelectionTimeoutMS=10000)
+    client.admin.command("ping")
+    db = client["linebot"]
+    collection = db["users"]
+    print("✅ 成功連線到 MongoDB")
+except Exception as e:
+    print("❌ MongoDB 連線失敗：", e)
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
