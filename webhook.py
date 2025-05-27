@@ -20,7 +20,7 @@ configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(channel_secret=LINE_CHANNEL_SECRET)
 
 # MongoDB Config
-MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_URI = 'mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 client = MongoClient(MONGO_URI)
 db = client["linebot"]
 collection = db["users"]
