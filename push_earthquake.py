@@ -64,4 +64,4 @@ while True:
     else:
         print("⚠️ 抓取地震資料失敗")
 
-    time.sleep(300)
+    time.sleep(3600)    # 每1小時檢查一次
