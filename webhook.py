@@ -9,6 +9,11 @@ import certifi
 from datetime import datetime, UTC
 import os
 
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+
 app = Flask(__name__)
 
 # LINE Config
@@ -31,6 +36,8 @@ except Exception as e:
 
 # 推播函式：發送訊息給所有使用者
 def push_messages_to_all_users(message_text):
+    print(f"訊息類型: {type(message_text)}")
+    print(f"訊息內容: {message_text}")
     try:
         # 從 MongoDB 取得所有 user_id
         user_ids = [user['user_id'] for user in collection.find({}, {'user_id': 1})]
