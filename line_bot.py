@@ -6,6 +6,7 @@ from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 import re
 from datetime import datetime, UTC
+import traceback
 
 def handle_webhook():
     signature = request.headers.get('X-Line-Signature', '')
@@ -53,11 +54,9 @@ def handle_webhook():
                         if match:
                             location_keyword = match.group(1) if match.group(1) else None
                             magnitude_filter = float(match.group(2)) if match.group(2) else None
-                            start_date = match.group(3)
-                            end_date = match.group(4)
 
                         if location_keyword:
-                            query['location'] = {'$regex': location_keyword}
+                            query['epicenter'] = {'$regex': location_keyword}
 
                         if magnitude_filter:
                             query['magnitude'] = {'$gte': magnitude_filter}
@@ -68,7 +67,7 @@ def handle_webhook():
                         if results:
                             lines = [f"📚 查詢結果："]
                             for idx, quake in enumerate(results, start=1):
-                                lines.append(f"{idx}️⃣ {quake['origin_time']} / {quake['location']} / 芮氏 {quake['magnitude']}")
+                                lines.append(f"{idx}️⃣ {quake['origin_time']} / {quake['epicenter']} / 芮氏 {quake['magnitude']}")
                             reply_text = "\n".join(lines)
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
@@ -81,6 +80,8 @@ def handle_webhook():
 
     except Exception as e:
         print("❌ 處理訊息時發生錯誤：", e)
+        traceback.print_exc()
         return 'Error occurred', 500
 
+    print("✅ LINE webhook 處理成功")
     return 'OK', 200
