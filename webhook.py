@@ -80,36 +80,42 @@ def webhook():
         for event in events:
             if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
                 user_id = event.source.user_id
-                user_message = event.message.text
+                user_message = event.message.text.strip()
 
+                 # 新使用者儲存
                 result = collection.update_one(
                     {'user_id': user_id},
-                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC), 'message': user_message}},
+                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC)}},
                     upsert=True
                 )
-
                 if result.upserted_id is not None:
                     print(f"✅ 新使用者註冊：{user_id}")
                 else:
                     print(f"🌀 使用者已存在：{user_id}")
 
-                # ✅ 回覆訊息
                 with ApiClient(configuration) as api_client:
                     line_bot_api = MessagingApi(api_client)
 
-                    if user_message.strip().lower() == "test":
-                        push_messages_to_all_users(collection, "🚨 這是測試地震推播訊息")
-                        reply = ReplyMessageRequest(
-                            reply_token=event.reply_token,
-                            messages=[TextMessage(text="✅ 已發送測試推播給所有人")]
-                        )
+                    # 如果收到「近5次地震」指令
+                    if "地震" in user_message:
+                        history = db["earthquakes"].find().sort("origin_time", -1).limit(5)
+                        lines = ["📚 近5次地震紀錄："]
+                        for idx, quake in enumerate(history, start=1):
+                            time_str = quake['origin_time']
+                            location = quake['location']
+                            mag = quake['magnitude']
+                            lines.append(f"{idx}️⃣ {time_str} / {location} / 芮氏 {mag}")
+                        reply_text = "\n".join(lines)
                     else:
-                        reply = ReplyMessageRequest(
-                            reply_token=event.reply_token,
-                            messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
-                        )
-                    
+                        reply_text = "👋 你已成功加入地震推播清單！\n輸入「近5次地震」可以查看地震紀錄。"
+
+                    # 回覆用戶
+                    reply = ReplyMessageRequest(
+                        reply_token=event.reply_token,
+                        messages=[TextMessage(text=reply_text)]
+                    )
                     line_bot_api.reply_message(reply)
+
 
     except Exception as e:
         print("❌ 處理訊息時發生錯誤：", e)

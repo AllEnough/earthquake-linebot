@@ -79,8 +79,22 @@ def quake_check_loop():
     while True:
         quake = get_latest_quake()
         if quake:
+            # 如果是新地震
             if quake['origin_time'] != last_quake_time:
                 last_quake_time = quake['origin_time']
+
+                # 儲存到 MongoDB 的 earthquakes collection（防止重複）
+                try:
+                    existing = db["earthquakes"].find_one({'origin_time': quake['origin_time']})
+                    if not existing:
+                        db["earthquakes"].insert_one(quake)
+                        print("✅ 新地震資料已儲存到 MongoDB")
+                    else:
+                        print("ℹ️ 此地震資料已存在於資料庫中")
+                except Exception as e:
+                    print("⚠️ 儲存地震資料時發生錯誤：", e)
+
+                # 推播訊息
                 msg = f"""📢 新地震速報！
 時間：{quake['origin_time']}
 地點：{quake['location']}
@@ -96,6 +110,7 @@ def quake_check_loop():
             print("⚠️ 抓取地震資料失敗")
 
         time.sleep(300)  # 每5分鐘檢查一次
+
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
