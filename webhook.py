@@ -28,25 +28,26 @@ collection = db["users"]
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
-    signature = request.headers['X-Line-Signature']
+    print("📥 收到 LINE 請求！")
+
+    signature = request.headers['X-Line-Signature', '']
     body = request.get_data(as_text=True)
+    print("📦 請求內容：", body)
 
     try:
         events = parser.parse(body, signature)
     except Exception as e:
         print("Webhook 驗證錯誤：", e)
         abort(400)
-    print("📥 收到 LINE 請求！")
-    print("📝 請求內容：", body)
 
-
+def handle_events(events):
     for event in events:
-        print("🔥 LINE Event 收到：", event)
+        print("🔥 收到事件：", event)
+
         if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
             user_id = event.source.user_id
             user_message = event.message.text
 
-            # ✅ 儲存使用者到 MongoDB
             result = collection.update_one(
                 {'user_id': user_id},
                 {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
@@ -66,4 +67,38 @@ def webhook():
                 )
                 line_bot_api.reply_message(reply)
 
-    return 'OK'
+    
+    # ✅ LINE 只等你幾秒就會斷線，請先回應 200 OK 再處理其他事情！
+    from threading import Thread
+    Thread(target=handle_events, args=(events,)).start()
+
+    return 'OK'  # <=== 這要很快回應
+
+
+    # for event in events:
+    #     print("🔥 LINE Event 收到：", event)
+    #     if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
+    #         user_id = event.source.user_id
+    #         user_message = event.message.text
+
+    #         # ✅ 儲存使用者到 MongoDB
+    #         result = collection.update_one(
+    #             {'user_id': user_id},
+    #             {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.utcnow()}},
+    #             upsert=True
+    #         )
+
+    #         if result.upserted_id is not None:
+    #             print(f"✅ 新使用者註冊：{user_id}")
+    #         else:
+    #             print(f"🌀 使用者已存在：{user_id}")
+
+    #         with ApiClient(configuration) as api_client:
+    #             line_bot_api = MessagingApi(api_client)
+    #             reply = ReplyMessageRequest(
+    #                 reply_token=event.reply_token,
+    #                 messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
+    #             )
+    #             line_bot_api.reply_message(reply)
+
+    # return 'OK'
