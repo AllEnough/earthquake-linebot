@@ -1,17 +1,19 @@
 # 主程式入口
-from flask import Flask, request
+from flask import Flask
+from earthquake import quake_check_loop
+from line_bot import handle_webhook
 import threading
 import os
-from line_bot import handle_line_event
-from earthquake import quake_check_loop
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 app = Flask(__name__)
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
-    signature = request.headers.get('X-Line-Signature', '')
-    body = request.get_data(as_text=True)
-    return handle_line_event(signature, body)
+    return handle_webhook()
 
 if __name__ == "__main__":
     threading.Thread(target=quake_check_loop, daemon=True).start()
