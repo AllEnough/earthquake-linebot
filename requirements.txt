@@ -1,4 +1,4 @@
-requests
-line-bot-sdk>=3.17.1
 Flask
 pymongo
+requests
+line-bot-sdk>=3.17.1

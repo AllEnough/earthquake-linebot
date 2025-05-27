@@ -1,8 +1,8 @@
 from flask import Flask, request, abort
 from linebot.v3.webhook import WebhookParser
 from linebot.v3.messaging import Configuration, MessagingApi, ApiClient
-from linebot.v3.webhook.models import MessageEvent
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
+from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 
 from pymongo import MongoClient
 import os
@@ -34,7 +34,7 @@ def webhook():
         abort(400)
 
     for event in events:
-        if isinstance(event, MessageEvent):
+        if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
             user_id = event.source.user_id
             if collection.find_one({'user_id': user_id}) is None:
                 collection.insert_one({'user_id': user_id})
