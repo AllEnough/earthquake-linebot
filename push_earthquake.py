@@ -10,16 +10,24 @@ USER_ID = "U7a28ed369cc94af4c0ff6f811b59e2ad"
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 
-def push_message(text):
+# ✅ 多人推播名單
+USER_IDS = [
+    "U7a28ed369cc94af4c0ff6f811b59e2ad", # 我
+    "Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # 其他人
+]
+
+def push_messages_to_all_users(user_ids, text):
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
-        try:
-            message = TextMessage(text=text)
-            body = PushMessageRequest(to=USER_ID, messages=[message])
-            line_bot_api.push_message(push_message_request=body)
-            print("✅ 已推播訊息")
-        except Exception as e:
-            print("❌ 推播失敗：", e)
+        for uid in user_ids:
+            try:
+                message = TextMessage(text=text)
+                body = PushMessageRequest(to=uid, messages=[message])
+                line_bot_api.push_message(push_message_request=body)
+                print(f"✅ 已推播訊息給 {uid}")
+            except Exception as e:
+                print(f"❌ 推播給 {uid} 失敗：", e)
+
 
 
 def get_latest_quake():
@@ -58,7 +66,7 @@ while True:
 規模：{quake['magnitude']} 芮氏
 ➡️ 詳情：{quake['link']}
 """
-            push_message(msg)
+            push_messages_to_all_users(USER_IDS, msg)
         else:
             print(f"🔄 尚無新地震，最後地震：{last_quake_time}")
     else:
