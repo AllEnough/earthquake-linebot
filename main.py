@@ -11,7 +11,6 @@ import os
 import requests
 import threading
 import time
-
 import sys
 import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -44,7 +43,7 @@ def get_latest_quake():
     try:
         eq = data['records']['Earthquake'][0]
         info = eq['EarthquakeInfo']
-        return {    
+        return {
             'origin_time': info['OriginTime'],
             'location': info['Epicenter']['Location'],
             'depth': info['FocalDepth'],
@@ -79,11 +78,9 @@ def quake_check_loop():
     while True:
         quake = get_latest_quake()
         if quake:
-            # 如果是新地震
             if quake['origin_time'] != last_quake_time:
                 last_quake_time = quake['origin_time']
 
-                # 儲存到 MongoDB 的 earthquakes collection（防止重複）
                 try:
                     existing = db["earthquakes"].find_one({'origin_time': quake['origin_time']})
                     if not existing:
@@ -94,7 +91,6 @@ def quake_check_loop():
                 except Exception as e:
                     print("⚠️ 儲存地震資料時發生錯誤：", e)
 
-                # 推播訊息
                 msg = f"""📢 新地震速報！
 時間：{quake['origin_time']}
 地點：{quake['location']}
@@ -109,8 +105,7 @@ def quake_check_loop():
         else:
             print("⚠️ 抓取地震資料失敗")
 
-        time.sleep(300)  # 每5分鐘檢查一次
-
+        time.sleep(300)
 
 @app.route("/webhook", methods=['POST'])
 def webhook():
@@ -130,14 +125,13 @@ def webhook():
         for event in events:
             if isinstance(event, MessageEvent) and isinstance(event.message, TextMessageContent):
                 user_id = event.source.user_id
-                user_message = event.message.text
+                user_message = event.message.text.strip()
 
                 result = collection.update_one(
                     {'user_id': user_id},
                     {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC)}},
                     upsert=True
                 )
-
                 if result.upserted_id is not None:
                     print(f"✅ 新使用者註冊：{user_id}")
                 else:
@@ -145,9 +139,45 @@ def webhook():
 
                 with ApiClient(configuration) as api_client:
                     line_bot_api = MessagingApi(api_client)
+
+                    if "地震" in user_message:
+                        import re
+                        pattern = r"地震\s*([^\s><=]*)?\s*(?:[>≧]\s*(\d+\.?\d*)?)?"
+                        match = re.search(pattern, user_message)
+
+                        location_keyword = match.group(1) if match and match.group(1) else None
+                        magnitude_filter = float(match.group(2)) if match and match.group(2) else None
+
+                        query = {}
+                        if location_keyword:
+                            query['location'] = {'$regex': location_keyword}
+
+                        if magnitude_filter:
+                            query['magnitude'] = {'$gte': magnitude_filter}
+
+                        history = db["earthquakes"].find(query).sort("origin_time", -1).limit(5)
+
+                        results = list(history)
+                        if results:
+                            label = f"{location_keyword or ''}地震"
+                            if magnitude_filter:
+                                label += f"（規模 > {magnitude_filter}）"
+
+                            lines = [f"📚 {label.strip()}紀錄："]
+                            for idx, quake in enumerate(results, start=1):
+                                time_str = quake['origin_time']
+                                location = quake['location']
+                                mag = quake['magnitude']
+                                lines.append(f"{idx}️⃣ {time_str} / {location} / 芮氏 {mag}")
+                            reply_text = "\n".join(lines)
+                        else:
+                            reply_text = f"❌ 查無符合條件的地震資料。"
+
+
+
                     reply = ReplyMessageRequest(
                         reply_token=event.reply_token,
-                        messages=[TextMessage(text="👋 你已成功加入地震推播清單！")]
+                        messages=[TextMessage(text=reply_text)]
                     )
                     line_bot_api.reply_message(reply)
 
@@ -158,8 +188,6 @@ def webhook():
     return 'OK', 200
 
 if __name__ == "__main__":
-    # 啟動背景執行緒，持續偵測地震並推播
     threading.Thread(target=quake_check_loop, daemon=True).start()
-
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
