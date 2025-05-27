@@ -38,7 +38,7 @@ def get_latest_quake():
     try:
         eq = data['records']['Earthquake'][0]
         info = eq['EarthquakeInfo']
-        return {
+        return {    
             'origin_time': info['OriginTime'],
             'location': info['Epicenter']['Location'],
             'depth': info['FocalDepth'],
