@@ -4,7 +4,7 @@ from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
-from linebot.models import ImageSendMessage
+from linebot.v3.messaging.models import ImageMessage
 from generate_chart import generate_chart
 import re
 from datetime import datetime, UTC
@@ -105,7 +105,7 @@ def handle_webhook():
                         generate_chart()
                         image_url = 'https://earthquake-linebot-production.up.railway.app/static/chart.png'
                         messages = [
-                            ImageSendMessage(
+                            ImageMessage(
                                 original_content_url=image_url,
                                 preview_image_url=image_url
                             )
