@@ -6,7 +6,7 @@ def generate_chart():
     import os
 
     # 字體設定
-    font_path = "fonts/static/NotoSansTC-Regular.ttf"
+    font_path = "fonts/NotoSansTC-Regular.ttf"
     if os.path.exists(font_path):
         font_prop = fm.FontProperties(fname=font_path)
         plt.rcParams['font.family'] = font_prop.get_name()
