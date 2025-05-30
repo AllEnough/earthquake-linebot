@@ -3,7 +3,6 @@ from flask import request
 from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
-from linebot.v3.messaging.models import FlexMessage
 from config import parser, configuration, collection, db
 import re
 from datetime import datetime, UTC
@@ -65,78 +64,13 @@ def handle_webhook():
                                 reply_text = "⚠️ 查無最新地震資料。"
 
                     elif user_message in ["查詢", "選單"]:
-                        bubble={
-                            "type": "bubble",
-                            "hero": {
-                                "type": "image",
-                                "url": "https://i.imgur.com/FUozR2n.png",
-                                "size": "full",
-                                "aspectRatio": "20:13",
-                                "aspectMode": "cover"
-                            },
-                            "body": {
-                                "type": "box",
-                                "layout": "vertical",
-                                "spacing": "md",
-                                "contents": [
-                                    {
-                                        "type": "text",
-                                        "text": "地震查詢選單",
-                                        "size": "xl",
-                                        "weight": "bold"
-                                    },
-                                    {
-                                        "type": "box",
-                                        "layout": "vertical",
-                                        "spacing": "sm",
-                                        "contents": [
-                                            {
-                                                "type": "button",
-                                                "action": {
-                                                    "type": "message",
-                                                    "label": "🔍 查詢最新地震",
-                                                    "text": "最近"
-                                                },
-                                                "style": "primary",
-                                                "color": "#00BCD4"
-                                            },
-                                            {
-                                                "type": "button",
-                                                "action": {
-                                                    "type": "message",
-                                                    "label": "📍 根據震央查詢",
-                                                    "text": "地震 花蓮"
-                                                },
-                                                "style": "primary",
-                                                "color": "#4CAF50"
-                                            },
-                                            {
-                                                "type": "button",
-                                                "action": {
-                                                    "type": "message",
-                                                    "label": "🌊 查詢規模 >5",
-                                                    "text": "地震 >5"
-                                                },
-                                                "style": "primary",
-                                                "color": "#FF5722"
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    
-                        flex_message = FlexMessage(
-                            alt_text="📋 查詢選單",
-                            contents=bubble
-                        )
-                    
-                        reply = ReplyMessageRequest(
-                            reply_token=event.reply_token,
-                            messages=[flex_message]
-                        )
-                        line_bot_api.reply_message(reply)
-                        return 'OK', 200
+                        reply_text = (
+                            "📋 查詢選項：\n"
+                            "🔸 輸入「地震 花蓮」→ 查詢花蓮的地震\n"
+                            "🔸 輸入「地震 >5」→ 查詢規模大於5\n"
+                            "🔸 輸入「最近」→ 最新地震\n"
+                            "未來將支援按鈕式互動選單，敬請期待～"
+                    )
                     
                     # 分析地震查詢
                     elif "地震" in user_message:
@@ -173,7 +107,6 @@ def handle_webhook():
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
-
                     reply = ReplyMessageRequest(
                         reply_token=event.reply_token,
                         messages=[TextMessage(text=reply_text)]
