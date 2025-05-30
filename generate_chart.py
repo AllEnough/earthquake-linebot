@@ -1,6 +1,6 @@
 def generate_chart():
-    import matplotlib.pyplot as plt
     import matplotlib.font_manager as fm
+    import matplotlib.pyplot as plt
     from pymongo import MongoClient
     from datetime import datetime
     import os
@@ -10,8 +10,10 @@ def generate_chart():
     if os.path.exists(font_path):
         font_prop = fm.FontProperties(fname=font_path)
         plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
     else:
-        plt.rcParams['font.family'] = 'Microsoft JhengHei'
+        plt.rcParams['font.family'] = 'sans-serif'
+        print("⚠️ 找不到字體，使用預設字型")
 
     # MongoDB 連線
     client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
