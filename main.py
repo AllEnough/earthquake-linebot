@@ -6,6 +6,9 @@ from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
 
+from flask import jsonify
+from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
+
 import threading
 import os
 import sys
@@ -29,6 +32,22 @@ def index():
 def test():
     fetch_and_store_earthquake_data()   # 可整合進定時執行流程中
     return "✅ 手動執行地震資料抓取完成"
+
+@app.route("/analyze", methods=["GET"])
+def analyze():
+    avg = get_average_magnitude()
+    max_quake = get_max_magnitude()
+    recent = get_recent_earthquake_count()
+
+    return jsonify({
+        "平均規模": round(avg, 2) if avg else "無資料",
+        "最大地震": {
+            "時間": max_quake["origin_time"],
+            "震央": max_quake["epicenter"],
+            "規模": max_quake["magnitude"]
+        } if max_quake else "無資料",
+        "最近7天地震次數": recent
+    })
 
 if __name__ == "__main__":
     start_background_quake_import()  # ✅ 啟動每5分鐘抓一次地震資料並寫入 MongoDB

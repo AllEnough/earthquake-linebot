@@ -50,6 +50,7 @@ def handle_webhook():
                             "🔹 輸入「地震 花蓮」：查詢花蓮地區的地震\n"
                             "🔹 輸入「地震 >5」：查詢規模大於5的地震\n"
                             "🔹 輸入「最新」：查詢最新一筆地震紀錄\n"
+                            "🔹 輸入「地震地圖」：查詢最近的地震規模折線圖\n"
                             "🔹 更多功能開發中，敬請期待！"
                         )
                         messages = [TextMessage(text=reply_text)]
@@ -110,6 +111,18 @@ def handle_webhook():
                                 preview_image_url=image_url
                             )
                         ]
+                    
+                    elif user_message == "地震統計":
+                        from generate_monthly_stats_chart import generate_monthly_stats_chart
+                        generate_monthly_stats_chart()
+                        image_url = 'https://earthquake-linebot-production.up.railway.app/static/monthly_chart.png'
+                        messages = [
+                            ImageMessage(
+                                original_content_url=image_url,
+                                preview_image_url=image_url
+                            )
+                        ]
+
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
