@@ -41,16 +41,16 @@ def handle_webhook():
                     line_bot_api = MessagingApi(api_client)
 
                     # 預設回覆
-                    if user_message.lower() in ["幫助", "指令", "？", "help"]:
+                    if user_message.lower() in ["查詢功能"]:
                         reply_text = (
                             "🤖 地震查詢機器人使用說明：\n"
                             "🔹 輸入「地震」：查詢最近的地震資料\n"
                             "🔹 輸入「地震 花蓮」：查詢花蓮地區的地震\n"
                             "🔹 輸入「地震 >5」：查詢規模大於5的地震\n"
-                            "🔹 輸入「最近」：查詢最新一筆地震紀錄\n"
+                            "🔹 輸入「最新」：查詢最新一筆地震紀錄\n"
                             "🔹 更多功能開發中，敬請期待！"
                         )
-                    elif user_message == "最近":
+                    elif user_message == "最新":
                             latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
                             if latest:
                                 reply_text = (
@@ -62,15 +62,6 @@ def handle_webhook():
                                 )
                             else:
                                 reply_text = "⚠️ 查無最新地震資料。"
-
-                    elif user_message in ["查詢", "選單"]:
-                        reply_text = (
-                            "📋 查詢選項：\n"
-                            "🔸 輸入「地震 花蓮」→ 查詢花蓮的地震\n"
-                            "🔸 輸入「地震 >5」→ 查詢規模大於5\n"
-                            "🔸 輸入「最近」→ 最新地震\n"
-                            "未來將支援按鈕式互動選單，敬請期待～"
-                    )
                     
                     # 分析地震查詢
                     elif "地震" in user_message:
