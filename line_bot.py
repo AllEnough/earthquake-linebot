@@ -69,7 +69,7 @@ def handle_webhook():
                             "type": "bubble",
                             "hero": {
                                 "type": "image",
-                                "url": "https://i.imgur.com/FUozR2n.png",  # 可替換成你自己的地震圖片
+                                "url": "https://i.imgur.com/FUozR2n.png",
                                 "size": "full",
                                 "aspectRatio": "20:13",
                                 "aspectMode": "cover"
@@ -116,7 +116,7 @@ def handle_webhook():
                                                     "type": "message",
                                                     "label": "🌊 查詢規模 >5",
                                                     "text": "地震 >5"
-                                                },      
+                                                },
                                                 "style": "primary",
                                                 "color": "#FF5722"
                                             }
