@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from pymongo import MongoClient
 from datetime import datetime
 
@@ -15,6 +16,10 @@ times = [datetime.strptime(r["origin_time"], "%Y-%m-%d %H:%M:%S") for r in recor
 magnitudes = [r["magnitude"] for r in records]
 
 # 畫圖
+
+# 嘗試加載支援中文字體（你可以根據部署環境更換字體名稱）
+plt.rcParams['font.family'] = 'Noto Sans CJK TC'  # 或 Microsoft JhengHei, SimHei 等
+plt.title("地震發生時間與規模")
 plt.figure(figsize=(10, 5))
 plt.plot(times, magnitudes, marker='o', linestyle='-', color='royalblue')
 plt.title("最近10筆地震規模變化")
