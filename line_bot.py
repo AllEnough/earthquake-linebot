@@ -68,10 +68,14 @@ def handle_webhook():
                         if results:
                             lines = [f"📚 查詢結果："]
                             for idx, quake in enumerate(results, start=1):
-                                lines.append(f"{idx}️⃣ {quake['origin_time']} / {quake['epicenter']} / 芮氏 {quake['magnitude']}")
+                                origin_time = quake.get('origin_time', '未知時間')
+                                epicenter = quake.get('epicenter', '未知震央')
+                                magnitude = quake.get('magnitude', '未知')
+                                lines.append(f"{idx}️⃣ {origin_time} / {epicenter} / 芮氏 {magnitude}")
                             reply_text = "\n".join(lines)
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
+
 
                     reply = ReplyMessageRequest(
                         reply_token=event.reply_token,
