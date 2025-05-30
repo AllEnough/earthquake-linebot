@@ -4,6 +4,8 @@ from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
+from linebot.models import ImageSendMessage
+from generate_chart import generate_chart
 import re
 from datetime import datetime, UTC
 import traceback
@@ -95,6 +97,14 @@ def handle_webhook():
                             reply_text = "\n".join(lines)
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
+                    
+                    elif '地震圖表' in text:
+                        generate_chart()
+                        image_message = ImageSendMessage(
+                            original_content_url='https://earthquake-linebot-production.up.railway.app/static/chart.png',
+                            preview_image_url='https://earthquake-linebot-production.up.railway.app/static/chart.png'
+                        )
+                        line_bot_api.reply_message(event.reply_token, image_message)
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
