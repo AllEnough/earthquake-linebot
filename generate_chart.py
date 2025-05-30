@@ -6,14 +6,21 @@ def generate_chart():
     import os
 
     # 字體設定
-    font_path = "fonts/NotoSansTC-Regular.ttf"
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+
     if os.path.exists(font_path):
         font_prop = fm.FontProperties(fname=font_path)
         plt.rcParams['font.family'] = font_prop.get_name()
         print(f"✅ 使用中文字體：{font_prop.get_name()}")
     else:
+        print("⚠️ 找不到字體：", font_path)
         plt.rcParams['font.family'] = 'sans-serif'
-        print("⚠️ 找不到字體，使用預設字型")
 
     # MongoDB 連線
     client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
