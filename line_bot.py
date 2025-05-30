@@ -3,6 +3,7 @@ from flask import request
 from linebot.v3.webhooks.models import MessageEvent, TextMessageContent
 from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
+from linebot.v3.messaging.models import FlexMessage
 from config import parser, configuration, collection, db
 import re
 from datetime import datetime, UTC
@@ -41,10 +42,102 @@ def handle_webhook():
                     line_bot_api = MessagingApi(api_client)
 
                     # 預設回覆
-                    reply_text = "請輸入『地震』+關鍵字或數字，例如：地震 台中、地震>5"
+                    if user_message.lower() in ["幫助", "指令", "？", "help"]:
+                        reply_text = (
+                            "🤖 地震查詢機器人使用說明：\n"
+                            "🔹 輸入「地震」：查詢最近的地震資料\n"
+                            "🔹 輸入「地震 花蓮」：查詢花蓮地區的地震\n"
+                            "🔹 輸入「地震 >5」：查詢規模大於5的地震\n"
+                            "🔹 輸入「最近」：查詢最新一筆地震紀錄\n"
+                            "🔹 更多功能開發中，敬請期待！"
+                        )
+                    elif user_message == "最近":
+                            latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
+                            if latest:
+                                reply_text = (
+                                    f"📍 最新地震資訊：\n"
+                                    f"時間：{latest.get('origin_time', '未知')}\n"
+                                    f"震央：{latest.get('epicenter', '未知')}\n"
+                                    f"深度：{latest.get('depth', '未知')} 公里\n"
+                                    f"規模：芮氏 {latest.get('magnitude', '未知')}"
+                                )
+                            else:
+                                reply_text = "⚠️ 查無最新地震資料。"
 
+                    elif user_message in ["查詢", "選單"]:
+                        flex_message = FlexMessage(
+                            alt_text="📋 查詢選單",
+                            contents={
+                                "type": "bubble",
+                                "hero": {
+                                    "type": "image",
+                                    "url": "https://i.imgur.com/FUozR2n.png",  # 可替換成你自己的地震圖片
+                                    "size": "full",
+                                    "aspectRatio": "20:13",
+                                    "aspectMode": "cover"
+                                },
+                                "body": {
+                                    "type": "box",
+                                    "layout": "vertical",
+                                    "spacing": "md",
+                                    "contents": [
+                                        {
+                                            "type": "text",
+                                            "text": "地震查詢選單",
+                                            "size": "xl",
+                                            "weight": "bold"
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "spacing": "sm",
+                                            "contents": [
+                                                {
+                                                    "type": "button",
+                                                    "action": {
+                                                        "type": "message",
+                                                        "label": "🔍 查詢最新地震",
+                                                        "text": "最近"
+                                                    },
+                                                    "style": "primary",
+                                                    "color": "#00BCD4"
+                                                },
+                                                {
+                                                    "type": "button",
+                                                    "action": {
+                                                        "type": "message",
+                                                        "label": "📍 根據震央查詢",
+                                                        "text": "地震 花蓮"
+                                                    },
+                                                    "style": "primary",
+                                                    "color": "#4CAF50"
+                                                },
+                                                {
+                                                    "type": "button",
+                                                    "action": {
+                                                        "type": "message",
+                                                        "label": "🌊 查詢規模 >5",
+                                                        "text": "地震 >5"
+                                                    },      
+                                                    "style": "primary",
+                                                    "color": "#FF5722"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        )
+
+                        reply = ReplyMessageRequest(
+                            reply_token=event.reply_token,
+                            messages=[flex_message]
+                        )
+                        line_bot_api.reply_message(reply)
+                        continue
+                    
                     # 分析地震查詢
-                    if "地震" in user_message:
+                    elif "地震" in user_message:
                         query = {}
                         location_keyword = None
                         magnitude_filter = None
@@ -76,6 +169,8 @@ def handle_webhook():
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
 
+                    else:
+                        reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
 
                     reply = ReplyMessageRequest(
                         reply_token=event.reply_token,
