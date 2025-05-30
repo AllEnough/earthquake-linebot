@@ -52,18 +52,20 @@ def handle_webhook():
                             "🔹 輸入「最新」：查詢最新一筆地震紀錄\n"
                             "🔹 更多功能開發中，敬請期待！"
                         )
+                        messages = [TextMessage(text=reply_text)]
                     elif user_message == "最新":
-                            latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
-                            if latest:
-                                reply_text = (
-                                    f"📍 最新地震資訊：\n"
-                                    f"時間：{latest.get('origin_time', '未知')}\n"
-                                    f"震央：{latest.get('epicenter', '未知')}\n"
-                                    f"深度：{latest.get('depth', '未知')} 公里\n"
-                                    f"規模：芮氏 {latest.get('magnitude', '未知')}"
-                                )
-                            else:
-                                reply_text = "⚠️ 查無最新地震資料。"
+                        latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
+                        if latest:
+                            reply_text = (
+                                f"📍 最新地震資訊：\n"
+                                f"時間：{latest.get('origin_time', '未知')}\n"
+                                f"震央：{latest.get('epicenter', '未知')}\n"
+                                f"深度：{latest.get('depth', '未知')} 公里\n"
+                                f"規模：芮氏 {latest.get('magnitude', '未知')}"
+                            )
+                        else:
+                            reply_text = "⚠️ 查無最新地震資料。"
+                        messages = [TextMessage(text=reply_text)]
                     
                     # 分析地震查詢
                     elif user_message == "地震":
@@ -113,7 +115,13 @@ def handle_webhook():
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
                         messages = [TextMessage(text=reply_text)]
 
-                    line_bot_api.reply_message(event.reply_token, messages)
+                    line_bot_api.reply_message(
+                        ReplyMessageRequest(
+                            reply_token=event.reply_token,
+                            messages=messages
+                        )
+                    )
+
 
 
     except Exception as e:
