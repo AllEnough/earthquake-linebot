@@ -30,6 +30,11 @@ def test():
     fetch_and_store_earthquake_data()   # 可整合進定時執行流程中
     return "✅ 手動執行地震資料抓取完成"
 
+# 加在 webhook 裡你希望更新圖表的位置
+from generate_chart import generate_chart  # 假設你封裝成 function
+
+generate_chart()  # 每次 webhook 執行時都更新圖表
+
 if __name__ == "__main__":
     start_background_quake_import()  # ✅ 啟動每5分鐘抓一次地震資料並寫入 MongoDB
     threading.Thread(target=quake_check_loop, daemon=True).start()  # ✅ 啟動 LINE 地震推播檢查
