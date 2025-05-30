@@ -40,13 +40,14 @@ def handle_webhook():
                 with ApiClient(configuration) as api_client:
                     line_bot_api = MessagingApi(api_client)
 
+                    # 預設回覆
+                    reply_text = "請輸入『地震』+關鍵字或數字，例如：地震 台中、地震>5"
+
                     # 分析地震查詢
                     if "地震" in user_message:
                         query = {}
                         location_keyword = None
                         magnitude_filter = None
-                        start_date = None
-                        end_date = None
 
                         pattern = r"地震\s*([^\s><=]*)?\s*(?:[>≧]\s*(\d+\.?\d*)?)?"
                         match = re.search(pattern, user_message)
@@ -77,6 +78,7 @@ def handle_webhook():
                         messages=[TextMessage(text=reply_text)]
                     )
                     line_bot_api.reply_message(reply)
+
 
     except Exception as e:
         print("❌ 處理訊息時發生錯誤：", e)
