@@ -65,76 +65,78 @@ def handle_webhook():
                                 reply_text = "⚠️ 查無最新地震資料。"
 
                     elif user_message in ["查詢", "選單"]:
+                        bubble={
+                            "type": "bubble",
+                            "hero": {
+                                "type": "image",
+                                "url": "https://i.imgur.com/FUozR2n.png",  # 可替換成你自己的地震圖片
+                                "size": "full",
+                                "aspectRatio": "20:13",
+                                "aspectMode": "cover"
+                            },
+                            "body": {
+                                "type": "box",
+                                "layout": "vertical",
+                                "spacing": "md",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": "地震查詢選單",
+                                        "size": "xl",
+                                        "weight": "bold"
+                                    },
+                                    {
+                                        "type": "box",
+                                        "layout": "vertical",
+                                        "spacing": "sm",
+                                        "contents": [
+                                            {
+                                                "type": "button",
+                                                "action": {
+                                                    "type": "message",
+                                                    "label": "🔍 查詢最新地震",
+                                                    "text": "最近"
+                                                },
+                                                "style": "primary",
+                                                "color": "#00BCD4"
+                                            },
+                                            {
+                                                "type": "button",
+                                                "action": {
+                                                    "type": "message",
+                                                    "label": "📍 根據震央查詢",
+                                                    "text": "地震 花蓮"
+                                                },
+                                                "style": "primary",
+                                                "color": "#4CAF50"
+                                            },
+                                            {
+                                                "type": "button",
+                                                "action": {
+                                                    "type": "message",
+                                                    "label": "🌊 查詢規模 >5",
+                                                    "text": "地震 >5"
+                                                },      
+                                                "style": "primary",
+                                                "color": "#FF5722"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    
                         flex_message = FlexMessage(
                             alt_text="📋 查詢選單",
-                            contents={
-                                "type": "bubble",
-                                "hero": {
-                                    "type": "image",
-                                    "url": "https://i.imgur.com/FUozR2n.png",  # 可替換成你自己的地震圖片
-                                    "size": "full",
-                                    "aspectRatio": "20:13",
-                                    "aspectMode": "cover"
-                                },
-                                "body": {
-                                    "type": "box",
-                                    "layout": "vertical",
-                                    "spacing": "md",
-                                    "contents": [
-                                        {
-                                            "type": "text",
-                                            "text": "地震查詢選單",
-                                            "size": "xl",
-                                            "weight": "bold"
-                                        },
-                                        {
-                                            "type": "box",
-                                            "layout": "vertical",
-                                            "spacing": "sm",
-                                            "contents": [
-                                                {
-                                                    "type": "button",
-                                                    "action": {
-                                                        "type": "message",
-                                                        "label": "🔍 查詢最新地震",
-                                                        "text": "最近"
-                                                    },
-                                                    "style": "primary",
-                                                    "color": "#00BCD4"
-                                                },
-                                                {
-                                                    "type": "button",
-                                                    "action": {
-                                                        "type": "message",
-                                                        "label": "📍 根據震央查詢",
-                                                        "text": "地震 花蓮"
-                                                    },
-                                                    "style": "primary",
-                                                    "color": "#4CAF50"
-                                                },
-                                                {
-                                                    "type": "button",
-                                                    "action": {
-                                                        "type": "message",
-                                                        "label": "🌊 查詢規模 >5",
-                                                        "text": "地震 >5"
-                                                    },      
-                                                    "style": "primary",
-                                                    "color": "#FF5722"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
+                            contents=bubble
                         )
-
+                    
                         reply = ReplyMessageRequest(
                             reply_token=event.reply_token,
                             messages=[flex_message]
                         )
                         line_bot_api.reply_message(reply)
-                        continue
+                        return 'OK', 200
                     
                     # 分析地震查詢
                     elif "地震" in user_message:
