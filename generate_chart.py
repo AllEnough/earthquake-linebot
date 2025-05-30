@@ -6,7 +6,7 @@ import os
 
 # 1. 中文字體支援：指定 Noto Sans CJK TC 字體（你可以換成其他字體）
 # 若 Railway 沒安裝中文字型，請將字型檔案放入 fonts 目錄
-font_path = "fonts/NotoSansTC-Regular.ttf"
+font_path = "fonts/static/NotoSansTC-Regular.ttf"
 if os.path.exists(font_path):
     font_prop = fm.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = font_prop.get_name()
