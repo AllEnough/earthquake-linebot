@@ -66,7 +66,7 @@ def handle_webhook():
                                 reply_text = "⚠️ 查無最新地震資料。"
                     
                     # 分析地震查詢
-                    elif "地震" in user_message:
+                    elif user_message == "地震":
                         query = {}
                         location_keyword = None
                         magnitude_filter = None
@@ -97,23 +97,23 @@ def handle_webhook():
                             reply_text = "\n".join(lines)
                         else:
                             reply_text = "❌ 查無符合條件的地震紀錄。"
+                        messages = [TextMessage(text=reply_text)]
                     
-                    elif '地震圖表' in text:
+                    elif user_message == "地震地圖":
                         generate_chart()
-                        image_message = ImageSendMessage(
-                            original_content_url='https://earthquake-linebot-production.up.railway.app/static/chart.png',
-                            preview_image_url='https://earthquake-linebot-production.up.railway.app/static/chart.png'
-                        )
-                        line_bot_api.reply_message(event.reply_token, image_message)
+                        image_url = 'https://earthquake-linebot-production.up.railway.app/static/chart.png'
+                        messages = [
+                            ImageSendMessage(
+                                original_content_url=image_url,
+                                preview_image_url=image_url
+                            )
+                        ]
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
-                        
-                    reply = ReplyMessageRequest(
-                        reply_token=event.reply_token,
-                        messages=[TextMessage(text=reply_text)]
-                    )
-                    line_bot_api.reply_message(reply)
+                        messages = [TextMessage(text=reply_text)]
+
+                    line_bot_api.reply_message(event.reply_token, messages)
 
 
     except Exception as e:
