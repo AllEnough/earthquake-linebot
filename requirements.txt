@@ -3,4 +3,5 @@ flask
 pymongo[srv]
 certifi
 requests
+matplotlib
 line-bot-sdk>=3.17.1
