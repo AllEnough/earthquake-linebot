@@ -5,9 +5,6 @@ from earthquake import quake_check_loop
 from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
-from generate_chart import generate_chart
-from linebot.models import ImageSendMessage, TextSendMessage
-from line_bot import line_bot_api, handler
 
 import threading
 import os
