@@ -6,6 +6,7 @@ from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
 from generate_chart import generate_chart
+from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
 import re
 from datetime import datetime, UTC
 import traceback
@@ -113,9 +114,31 @@ def handle_webhook():
                         ]
                     
                     elif user_message == "地震統計":
-                        from generate_monthly_stats_chart import generate_monthly_stats_chart
-                        generate_monthly_stats_chart()
-                        image_url = 'https://earthquake-linebot-production.up.railway.app/static/monthly_chart.png'
+                        avg_mag = get_average_magnitude()
+                        max_quake = get_max_magnitude()
+                        recent_count = get_recent_earthquake_count()
+
+                        reply_text = (
+                            f"📊 地震資料統計分析：\n"
+                            f"🔸 最近 7 天地震次數：{recent_count} 次\n"
+                            f"🔸 平均地震規模：{round(avg_mag, 2) if avg_mag else '無資料'}\n"
+                        )
+
+                        if max_quake:
+                            reply_text += (
+                                f"🔸 最大地震：\n"
+                                f"  - 規模：{max_quake['magnitude']}\n"
+                                f"  - 震央：{max_quake['epicenter']}\n"
+                                f"  - 時間：{max_quake['origin_time']}\n"
+                            )
+                        else:
+                            reply_text += "🔸 查無最大地震資料。\n"
+                        messages = [TextMessage(text=reply_text)]
+                    
+                    elif user_message == "地震統計圖":
+                        from generate_chart import generate_daily_count_chart
+                        generate_daily_count_chart()
+                        image_url = 'https://earthquake-linebot-production.up.railway.app/static/chart_daily_count.png'
                         messages = [
                             ImageMessage(
                                 original_content_url=image_url,
