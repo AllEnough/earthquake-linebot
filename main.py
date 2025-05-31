@@ -1,10 +1,11 @@
 # 主程式入口
-from flask import Flask, request, abort
+from flask import Flask, send_file
 from quake_import_loop import start_background_quake_import
 from earthquake import quake_check_loop
 from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
+from generate_chart import generate_earthquake_heatmap_folium
 
 from flask import jsonify
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
@@ -32,6 +33,13 @@ def index():
 def test():
     fetch_and_store_earthquake_data()   # 可整合進定時執行流程中
     return "✅ 手動執行地震資料抓取完成"
+
+@app.route("/heatmap")
+def serve_heatmap():
+    path = "static/heatmap.html"
+    if not os.path.exists(path):
+        generate_earthquake_heatmap_folium(output_path=path)
+    return send_file(path)
 
 if __name__ == "__main__":
     start_background_quake_import()  # ✅ 啟動每5分鐘抓一次地震資料並寫入 MongoDB

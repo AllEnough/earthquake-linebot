@@ -2,9 +2,9 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from datetime import datetime, UTC, timedelta
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
 import pandas as pd
+import folium
+from folium.plugins import HeatMap
 import os
 
 def generate_chart():
@@ -227,68 +227,40 @@ def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", d
     plt.close()
     print(f"✅ 圖表已儲存：{output_path}")
 
-def generate_earthquake_heatmap_cartopy(output_path="static/chart_heatmap.png", days=7):
-    print("🗺️ [Cartopy] 產生地震熱區圖中...")
-
-    # 字體設定
-    base_dir = os.path.dirname(__file__)
-    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
-
-    if os.path.exists(font_path):
-        fm.fontManager.addfont(font_path)
-        font_prop = fm.FontProperties(fname=font_path)
-        plt.rcParams['font.family'] = font_prop.get_name()
-        print(f"✅ 使用中文字體：{font_prop.get_name()}")
-    else:
-        print("⚠️ 找不到字體：", font_path)
-        plt.rcParams['font.family'] = 'sans-serif'
+def generate_earthquake_heatmap_folium(output_path='static/heatmap.html', days=7):
+    print("🗺️ 使用 folium 產生地震熱區 HTML 地圖...")
 
     # MongoDB 連線
     client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
     db = client["earthquake_db"]
+
     cutoff_date = datetime.now(UTC) - timedelta(days=days)
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$gte": cutoff_date}},
         {"latitude": 1, "longitude": 1, "magnitude": 1}
     )
 
-    lats, lons, mags = [], [], []
-
+    quake_points = []
     for eq in earthquakes:
         try:
             lat = float(eq["latitude"])
             lon = float(eq["longitude"])
             mag = float(eq["magnitude"])
-            lats.append(lat)
-            lons.append(lon)
-            mags.append(mag)
+            quake_points.append([lat, lon, mag])
         except:
             continue
 
-    if not lats:
-        print("⚠️ 沒有足夠資料產生熱區圖")
+    if not quake_points:
+        print("⚠️ 沒有足夠地震資料")
         return
 
-    # 畫圖
-    plt.figure(figsize=(10, 8))
-    ax = plt.axes(projection=ccrs.PlateCarree())
-    ax.set_extent([119, 123.5, 20, 26], crs=ccrs.PlateCarree())
+    # 建立地圖（以台灣為中心）
+    m = folium.Map(location=[23.5, 121], zoom_start=6)
 
-    # 加上海岸線與國界
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS)
-    ax.add_feature(cfeature.LAND, facecolor='beige')
-    ax.add_feature(cfeature.OCEAN, facecolor='lightblue')
+    # 加上熱區圖層
+    HeatMap(quake_points, radius=15, blur=10, max_zoom=13).add_to(m)
 
-    # 加上地震點
-    scatter = ax.scatter(lons, lats, c=mags, cmap='Reds', s=[m**2 for m in mags],
-                         edgecolor='black', alpha=0.7, transform=ccrs.PlateCarree())
-
-    plt.colorbar(scatter, ax=ax, orientation='vertical', label='Magnitude')
-    plt.title("地震熱區分布圖（近一週）")
-    plt.tight_layout()
-
+    # 儲存地圖 HTML
     os.makedirs("static", exist_ok=True)
-    plt.savefig(output_path)
-    plt.close()
-    print(f"✅ Cartopy 熱區圖儲存完成：{output_path}")
+    m.save(output_path)
+    print(f"✅ 熱區地圖儲存完成：{output_path}")

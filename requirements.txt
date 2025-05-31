@@ -5,5 +5,5 @@ certifi
 requests
 matplotlib
 pandas
-cartopy
+folium
 line-bot-sdk>=3.17.1

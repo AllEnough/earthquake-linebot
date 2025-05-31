@@ -5,7 +5,7 @@ from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
-from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart, generate_earthquake_heatmap_cartopy
+from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
 import re
 from datetime import datetime, UTC
@@ -166,14 +166,12 @@ def handle_webhook():
                         ]
                     
                     elif user_message == "地震熱區圖":
-                        generate_earthquake_heatmap_cartopy()
-                        image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_heatmap.png"
-                        messages = [
-                            ImageMessage(
-                                original_content_url=image_url,
-                                preview_image_url=image_url
-                            )
-                        ]
+                        heatmap_url = "https://earthquake-linebot-production.up.railway.app/heatmap"
+                        reply_text = f"🔍 點擊下方連結查看互動式地震熱區圖：\n{heatmap_url}"
+                        line_bot_api.reply_message(
+                            event.reply_token,
+                            TextMessage(text=reply_text)
+                        )
 
 
 
