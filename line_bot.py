@@ -168,12 +168,7 @@ def handle_webhook():
                     elif user_message == "地震熱區圖":
                         heatmap_url = "https://earthquake-linebot-production.up.railway.app/heatmap"
                         reply_text = f"🔍 點擊下方連結查看互動式地震熱區圖：\n{heatmap_url}"
-                        line_bot_api.reply_message(
-                            event.reply_token,
-                            TextMessage(text=reply_text)
-                        )
-
-
+                        messages = [TextMessage(text=reply_text)]
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
