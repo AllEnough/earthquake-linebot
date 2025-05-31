@@ -4,5 +4,7 @@ pymongo[srv]
 certifi
 requests
 matplotlib
-matplotlib pandas basemap basemap-data-hires
+pandas
+basemap
+basemap-data-hires
 line-bot-sdk>=3.17.1
