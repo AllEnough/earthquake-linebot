@@ -16,7 +16,6 @@ def generate_chart():
     font_prop = fm.FontProperties(fname=font_path)
     plt.rcParams['font.family'] = font_prop.get_name()
 
-
     if os.path.exists(font_path):
         font_prop = fm.FontProperties(fname=font_path)
         plt.rcParams['font.family'] = font_prop.get_name()
@@ -53,6 +52,22 @@ def generate_chart():
 
 
 def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png"):
+    # 字體設定
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
+    else:
+        print("⚠️ 找不到字體：", font_path)
+        plt.rcParams['font.family'] = 'sans-serif'
+
     end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
 
@@ -61,6 +76,10 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     for i in range(days):
         date = (start_date + timedelta(days=i)).date()
         date_counts[date] = 0
+
+    # MongoDB 連線
+    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+    db = client["earthquake_db"]
 
     # 查詢資料
     results = db["earthquakes"].find({"origin_time": {"$gte": start_date}})
@@ -88,8 +107,28 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     plt.savefig(output_path)
     plt.close()
 
-def generate_avg_magnitude_chart(db, output_path="static/chart_avg_magnitude.png", days=7):
+def generate_avg_magnitude_chart(output_path="static/chart_avg_magnitude.png", days=7):
     print("📊 產生每日平均地震規模圖中...")
+
+    # 字體設定
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
+    else:
+        print("⚠️ 找不到字體：", font_path)
+        plt.rcParams['font.family'] = 'sans-serif'
+
+    # MongoDB 連線
+    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+    db = client["earthquake_db"]
 
     # 取出最近 N 天的地震資料
     earthquakes = db["earthquakes"].find(
@@ -129,8 +168,28 @@ def generate_avg_magnitude_chart(db, output_path="static/chart_avg_magnitude.png
     plt.close()
     print(f"✅ 圖表已儲存：{output_path}")
 
-def generate_max_magnitude_chart(db, output_path="static/chart_max_magnitude.png", days=7):
+def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", days=7):
     print("📊 產生每日最大地震規模圖中...")
+
+    # 字體設定
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
+    else:
+        print("⚠️ 找不到字體：", font_path)
+        plt.rcParams['font.family'] = 'sans-serif'
+
+    # MongoDB 連線
+    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+    db = client["earthquake_db"]
 
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$exists": True, "$ne": None}},
@@ -168,8 +227,28 @@ def generate_max_magnitude_chart(db, output_path="static/chart_max_magnitude.png
     plt.close()
     print(f"✅ 圖表已儲存：{output_path}")
 
-def generate_earthquake_heatmap(db, output_path="static/chart_heatmap.png", days=7):
+def generate_earthquake_heatmap(output_path="static/chart_heatmap.png", days=7):
     print("🗺️ 產生地震分布熱點圖中...")
+
+    # 字體設定
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
+    else:
+        print("⚠️ 找不到字體：", font_path)
+        plt.rcParams['font.family'] = 'sans-serif'
+
+    # MongoDB 連線
+    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+    db = client["earthquake_db"]
 
     cutoff_date = datetime.now(UTC) - timedelta(days=days)
     earthquakes = db["earthquakes"].find(
