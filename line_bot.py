@@ -146,7 +146,7 @@ def handle_webhook():
                         ]
                     
                     elif user_message == "地震平均規模圖":
-                        generate_avg_magnitude_chart()
+                        generate_avg_magnitude_chart(db)
                         image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_avg_magnitude.png"
                         messages = [
                             ImageMessage(
@@ -156,7 +156,7 @@ def handle_webhook():
                         ]
 
                     elif user_message == "地震最大規模圖":
-                        generate_max_magnitude_chart()
+                        generate_max_magnitude_chart(db)
                         image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_max_magnitude.png"
                         messages = [
                             ImageMessage(
@@ -166,7 +166,7 @@ def handle_webhook():
                         ]
                     
                     elif user_message == "地震熱區圖":
-                        generate_earthquake_heatmap()
+                        generate_earthquake_heatmap(db)
                         image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_heatmap.png"
                         messages = [
                             ImageMessage(
