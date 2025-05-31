@@ -2,10 +2,10 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from datetime import datetime, UTC, timedelta
-from mpl_toolkits.basemap import Basemap
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import pandas as pd
 import os
-from config import db
 
 def generate_chart():
     # 字體設定
@@ -227,18 +227,15 @@ def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", d
     plt.close()
     print(f"✅ 圖表已儲存：{output_path}")
 
-def generate_earthquake_heatmap(output_path="static/chart_heatmap.png", days=7):
-    print("🗺️ 產生地震分布熱點圖中...")
+def generate_earthquake_heatmap_cartopy(output_path="static/chart_heatmap.png", days=7):
+    print("🗺️ [Cartopy] 產生地震熱區圖中...")
 
     # 字體設定
-    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    base_dir = os.path.dirname(__file__)
     font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
 
-    fm.fontManager.addfont(font_path)
-    font_prop = fm.FontProperties(fname=font_path)
-    plt.rcParams['font.family'] = font_prop.get_name()
-
     if os.path.exists(font_path):
+        fm.fontManager.addfont(font_path)
         font_prop = fm.FontProperties(fname=font_path)
         plt.rcParams['font.family'] = font_prop.get_name()
         print(f"✅ 使用中文字體：{font_prop.get_name()}")
@@ -249,48 +246,49 @@ def generate_earthquake_heatmap(output_path="static/chart_heatmap.png", days=7):
     # MongoDB 連線
     client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
     db = client["earthquake_db"]
-
     cutoff_date = datetime.now(UTC) - timedelta(days=days)
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$gte": cutoff_date}},
         {"latitude": 1, "longitude": 1, "magnitude": 1}
     )
 
-    latitudes = []
-    longitudes = []
-    magnitudes = []
+    lats, lons, mags = [], [], []
 
     for eq in earthquakes:
         try:
             lat = float(eq["latitude"])
             lon = float(eq["longitude"])
             mag = float(eq["magnitude"])
-            latitudes.append(lat)
-            longitudes.append(lon)
-            magnitudes.append(mag)
+            lats.append(lat)
+            lons.append(lon)
+            mags.append(mag)
         except:
             continue
 
-    if not latitudes:
-        print("⚠️ 沒有足夠地震資料")
+    if not lats:
+        print("⚠️ 沒有足夠資料產生熱區圖")
         return
 
+    # 畫圖
     plt.figure(figsize=(10, 8))
-    m = Basemap(projection='merc', llcrnrlat=20, urcrnrlat=26, llcrnrlon=119, urcrnrlon=123.5, resolution='i')
-    m.drawcoastlines()
-    m.drawcountries()
-    m.drawmapboundary(fill_color='lightblue')
-    m.fillcontinents(color='beige', lake_color='lightblue')
-    m.drawparallels(range(20, 27, 1), labels=[1,0,0,0])
-    m.drawmeridians(range(119, 125, 1), labels=[0,0,0,1])
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    ax.set_extent([119, 123.5, 20, 26], crs=ccrs.PlateCarree())
 
-    x, y = m(longitudes, latitudes)
-    scatter = m.scatter(x, y, c=magnitudes, cmap='Reds', alpha=0.7, edgecolors='k', s=[m**2 for m in magnitudes])
+    # 加上海岸線與國界
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS)
+    ax.add_feature(cfeature.LAND, facecolor='beige')
+    ax.add_feature(cfeature.OCEAN, facecolor='lightblue')
 
-    plt.colorbar(scatter, label='Magnitude')
+    # 加上地震點
+    scatter = ax.scatter(lons, lats, c=mags, cmap='Reds', s=[m**2 for m in mags],
+                         edgecolor='black', alpha=0.7, transform=ccrs.PlateCarree())
+
+    plt.colorbar(scatter, ax=ax, orientation='vertical', label='Magnitude')
     plt.title("地震熱區分布圖（近一週）")
     plt.tight_layout()
+
     os.makedirs("static", exist_ok=True)
     plt.savefig(output_path)
     plt.close()
-    print(f"✅ 熱區圖儲存完成：{output_path}")
+    print(f"✅ Cartopy 熱區圖儲存完成：{output_path}")
