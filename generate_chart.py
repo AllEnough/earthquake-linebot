@@ -2,6 +2,8 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from datetime import datetime, UTC, timedelta
+from mpl_toolkits.basemap import Basemap
+import pandas as pd
 import os
 from config import db
 
@@ -76,7 +78,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     # 畫圖
     plt.figure(figsize=(10, 4))
     plt.plot(dates, counts, marker='o', linestyle='-', color='blue')
-    plt.title("📈 每日地震次數統計")
+    plt.title("每日地震次數統計")
     plt.xlabel("日期")
     plt.ylabel("地震次數")
     plt.grid(True)
@@ -85,3 +87,131 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     # 儲存圖片
     plt.savefig(output_path)
     plt.close()
+
+def generate_avg_magnitude_chart(db, output_path="static/chart_avg_magnitude.png", days=7):
+    print("📊 產生每日平均地震規模圖中...")
+
+    # 取出最近 N 天的地震資料
+    earthquakes = db["earthquakes"].find(
+        {"origin_time": {"$exists": True, "$ne": None}},
+        {"origin_time": 1, "magnitude": 1}
+    )
+
+    data = []
+    for eq in earthquakes:
+        if "origin_time" in eq and "magnitude" in eq:
+            try:
+                date = eq["origin_time"].date() if isinstance(eq["origin_time"], datetime) else datetime.fromisoformat(eq["origin_time"]).date()
+                data.append({"date": date, "magnitude": float(eq["magnitude"])})
+            except:
+                continue
+
+    if not data:
+        print("⚠️ 沒有可用資料")
+        return
+
+    df = pd.DataFrame(data)
+    avg_magnitude_per_day = df.groupby("date").mean().reset_index()
+    avg_magnitude_per_day = avg_magnitude_per_day.sort_values("date").tail(days)
+
+    # 畫圖
+    plt.figure(figsize=(10, 5))
+    plt.plot(avg_magnitude_per_day["date"], avg_magnitude_per_day["magnitude"], marker='o', color='tomato')
+    plt.xticks(rotation=45)
+    plt.title("每日地震平均規模")
+    plt.xlabel("日期")
+    plt.ylabel("平均規模")
+    plt.grid(True)
+    plt.tight_layout()
+
+    os.makedirs("static", exist_ok=True)
+    plt.savefig(output_path)
+    plt.close()
+    print(f"✅ 圖表已儲存：{output_path}")
+
+def generate_max_magnitude_chart(db, output_path="static/chart_max_magnitude.png", days=7):
+    print("📊 產生每日最大地震規模圖中...")
+
+    earthquakes = db["earthquakes"].find(
+        {"origin_time": {"$exists": True, "$ne": None}},
+        {"origin_time": 1, "magnitude": 1}
+    )
+
+    data = []
+    for eq in earthquakes:
+        try:
+            date = eq["origin_time"].date() if isinstance(eq["origin_time"], datetime) else datetime.fromisoformat(eq["origin_time"]).date()
+            magnitude = float(eq["magnitude"])
+            data.append({"date": date, "magnitude": magnitude})
+        except:
+            continue
+
+    if not data:
+        print("⚠️ 沒有可用資料")
+        return
+
+    df = pd.DataFrame(data)
+    max_magnitude_per_day = df.groupby("date").max().reset_index()
+    max_magnitude_per_day = max_magnitude_per_day.sort_values("date").tail(days)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(max_magnitude_per_day["date"], max_magnitude_per_day["magnitude"], marker='s', color='green')
+    plt.xticks(rotation=45)
+    plt.title("每日最大地震規模")
+    plt.xlabel("日期")
+    plt.ylabel("最大規模")
+    plt.grid(True)
+    plt.tight_layout()
+
+    os.makedirs("static", exist_ok=True)
+    plt.savefig(output_path)
+    plt.close()
+    print(f"✅ 圖表已儲存：{output_path}")
+
+def generate_earthquake_heatmap(db, output_path="static/chart_heatmap.png", days=7):
+    print("🗺️ 產生地震分布熱點圖中...")
+
+    cutoff_date = datetime.now(UTC) - timedelta(days=days)
+    earthquakes = db["earthquakes"].find(
+        {"origin_time": {"$gte": cutoff_date}},
+        {"latitude": 1, "longitude": 1, "magnitude": 1}
+    )
+
+    latitudes = []
+    longitudes = []
+    magnitudes = []
+
+    for eq in earthquakes:
+        try:
+            lat = float(eq["latitude"])
+            lon = float(eq["longitude"])
+            mag = float(eq["magnitude"])
+            latitudes.append(lat)
+            longitudes.append(lon)
+            magnitudes.append(mag)
+        except:
+            continue
+
+    if not latitudes:
+        print("⚠️ 沒有足夠地震資料")
+        return
+
+    plt.figure(figsize=(10, 8))
+    m = Basemap(projection='merc', llcrnrlat=20, urcrnrlat=26, llcrnrlon=119, urcrnrlon=123.5, resolution='i')
+    m.drawcoastlines()
+    m.drawcountries()
+    m.drawmapboundary(fill_color='lightblue')
+    m.fillcontinents(color='beige', lake_color='lightblue')
+    m.drawparallels(range(20, 27, 1), labels=[1,0,0,0])
+    m.drawmeridians(range(119, 125, 1), labels=[0,0,0,1])
+
+    x, y = m(longitudes, latitudes)
+    scatter = m.scatter(x, y, c=magnitudes, cmap='Reds', alpha=0.7, edgecolors='k', s=[m**2 for m in magnitudes])
+
+    plt.colorbar(scatter, label='Magnitude')
+    plt.title("地震熱區分布圖（近一週）")
+    plt.tight_layout()
+    os.makedirs("static", exist_ok=True)
+    plt.savefig(output_path)
+    plt.close()
+    print(f"✅ 熱區圖儲存完成：{output_path}")

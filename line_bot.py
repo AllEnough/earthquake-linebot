@@ -5,7 +5,7 @@ from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
-from generate_chart import generate_chart
+from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart, generate_earthquake_heatmap
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
 import re
 from datetime import datetime, UTC
@@ -136,7 +136,6 @@ def handle_webhook():
                         messages = [TextMessage(text=reply_text)]
                     
                     elif user_message == "地震統計圖":
-                        from generate_chart import generate_daily_count_chart
                         generate_daily_count_chart()
                         image_url = 'https://earthquake-linebot-production.up.railway.app/static/chart_daily_count.png'
                         messages = [
@@ -145,6 +144,37 @@ def handle_webhook():
                                 preview_image_url=image_url
                             )
                         ]
+                    
+                    elif user_message == "地震平均規模圖":
+                        generate_avg_magnitude_chart()
+                        image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_avg_magnitude.png"
+                        messages = [
+                            ImageMessage(
+                                original_content_url=image_url,
+                                preview_image_url=image_url
+                            )
+                        ]
+
+                    elif user_message == "地震最大規模圖":
+                        generate_max_magnitude_chart()
+                        image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_max_magnitude.png"
+                        messages = [
+                            ImageMessage(
+                                original_content_url=image_url,
+                                preview_image_url=image_url
+                            )
+                        ]
+                    
+                    elif user_message == "地震熱區圖":
+                        generate_earthquake_heatmap()
+                        image_url = "https://earthquake-linebot-production.up.railway.app/static/chart_heatmap.png"
+                        messages = [
+                            ImageMessage(
+                                original_content_url=image_url,
+                                preview_image_url=image_url
+                            )
+                        ]
+
 
 
                     else:

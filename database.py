@@ -8,7 +8,6 @@ def get_db():
     db = client["linebot"]
     return db
 
-
 def get_user_collection():
     return get_db()["users"]
 
