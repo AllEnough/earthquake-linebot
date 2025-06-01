@@ -5,7 +5,7 @@ from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
-from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
+from generate_chart import generate_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
 
 import re
@@ -56,10 +56,9 @@ def handle_webhook():
                             "\n📊 圖表功能\n"
                             "🔹 輸入「地震地圖」：查看最近幾天的地震規模折線圖\n"
                             "🔹 輸入「地震統計」：查詢最近的地震規模折線圖\n"
-                            "🔹 輸入「地震統計圖」：查看最近 10 筆地震的規模折線圖\n"
                             "🔹 輸入「地震平均規模圖」：查看最近 7 天每日平均地震規模圖\n"
                             "🔹 輸入「地震最大規模圖」：查看最近 7 天每日最大地震規模圖\n"
-                            "🔹 更多功能開發中，敬請期待！"
+                            "\n🔹 更多功能開發中，敬請期待！"
                         )
                         messages = [TextMessage(text=reply_text)]
                     elif user_message == "最新":
@@ -141,16 +140,6 @@ def handle_webhook():
                         else:
                             reply_text += "🔸 查無最大地震資料。\n"
                         messages = [TextMessage(text=reply_text)]
-                    
-                    elif user_message == "地震統計圖":
-                        generate_daily_count_chart()
-                        image_url = 'https://earthquake-linebot-production.up.railway.app/static/chart_daily_count.png'
-                        messages = [
-                            ImageMessage(
-                                original_content_url=image_url,
-                                preview_image_url=image_url
-                            )
-                        ]
                     
                     elif user_message == "地震平均規模圖":
                         generate_avg_magnitude_chart()
