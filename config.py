@@ -23,8 +23,6 @@ MONGO_URI = clean_env("MONGO_URI")
 CWA_API_KEY = clean_env("CWA_API_KEY")
 DOMAIN = clean_env("DOMAIN")  # ✅ 用於圖表網址等地方
 
-print("ENV TEST CWA_API_KEY:", repr(os.getenv("CWA_API_KEY")))
-
 # ✅ 檢查環境變數是否齊全
 required_vars = [
     LINE_CHANNEL_SECRET,
