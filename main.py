@@ -1,12 +1,11 @@
 # 主程式入口
-from flask import Flask, send_file
+from flask import Flask
 from quake_import_loop import start_background_quake_import
 from earthquake import quake_check_loop
 from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
 
-from flask import jsonify
 import threading
 import os
 import sys
