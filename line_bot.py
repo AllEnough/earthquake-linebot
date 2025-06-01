@@ -7,6 +7,8 @@ from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
 from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
+from magnitude_forecast import forecast_magnitude_and_plot
+
 import re
 from datetime import datetime, UTC
 import traceback
@@ -169,6 +171,20 @@ def handle_webhook():
                         heatmap_url = "https://earthquake-linebot-production.up.railway.app/heatmap"
                         reply_text = f"🔍 點擊下方連結查看互動式地震熱區圖：\n{heatmap_url}"
                         messages = [TextMessage(text=reply_text)]
+
+                    elif user_message == "地震預測圖":
+                        forecast, image_path = forecast_magnitude_and_plot()
+                        if forecast and image_path:
+                            image_url = "https://earthquake-linebot-production.up.railway.app/static/forecast_magnitude.png"
+                            messages = [
+                                ImageMessage(
+                                    original_content_url=image_url,
+                                    preview_image_url=image_url
+                                )
+                            ]
+                        else:
+                            messages = [TextMessage(text="⚠️ 無法進行地震預測，資料不足或發生錯誤。")]
+
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"
