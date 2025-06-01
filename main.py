@@ -7,8 +7,6 @@ from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
 
 from flask import jsonify
-from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
-
 import threading
 import os
 import sys
