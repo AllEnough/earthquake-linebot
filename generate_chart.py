@@ -92,7 +92,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     dates = list(date_counts.keys())
     counts = list(date_counts.values())
 
-    # 畫圖
+   # 畫圖
     plt.figure(figsize=(10, 4))
     plt.plot(dates, counts, marker='o', linestyle='-', color='blue')
     plt.title("每日地震次數統計")
@@ -100,6 +100,9 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     plt.ylabel("地震次數")
     plt.grid(True)
     plt.tight_layout()
+
+    # ✅ 確保 static 資料夾存在
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # 儲存圖片
     plt.savefig(output_path)
