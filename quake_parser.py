@@ -1,10 +1,14 @@
 # quake_parser.py
 from datetime import datetime, UTC
 from logger import logger
+from geocode_utils import get_coordinates_from_text
+
 
 def parse_quake_record(eq):
     try:
         info = eq['EarthquakeInfo']
+        epicenter = info['Epicenter']['Location']
+
         quake = {
             'origin_time': datetime.strptime(info['OriginTime'], "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC),
             'epicenter': info['Epicenter']['Location'],
@@ -14,8 +18,14 @@ def parse_quake_record(eq):
             'link': eq['Web']
         }
 
+        # 嘗試補經緯度（使用 Nominatim API）
+        lat, lon = get_coordinates_from_text(epicenter)
+        if lat and lon:
+            quake['latitude'] = lat
+            quake['longitude'] = lon
+
         # 檢查欄位完整性
-        if None in quake.values():
+        if None in [quake['origin_time'], quake['epicenter'], quake['depth'], quake['magnitude']]:
             logger.warning(f"⚠️ 地震資料欄位不完整，跳過：{quake}")
             return None
 
