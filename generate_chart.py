@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from datetime import datetime, UTC, timedelta
 import pandas as pd
-import folium
-from folium.plugins import HeatMap
-from pmdarima import auto_arima
 import os
 
 def generate_chart():
@@ -227,97 +224,3 @@ def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", d
     plt.savefig(output_path)
     plt.close()
     print(f"✅ 圖表已儲存：{output_path}")
-
-def generate_earthquake_heatmap_folium(output_path='static/heatmap.html', days=7):
-    print("🗺️ 使用 folium 產生地震熱區 HTML 地圖...")
-
-    # MongoDB 連線
-    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
-    db = client["earthquake_db"]
-
-    cutoff_date = datetime.now(UTC) - timedelta(days=days)
-    earthquakes = db["earthquakes"].find(
-        {"origin_time": {"$gte": cutoff_date}},
-        {"latitude": 1, "longitude": 1, "magnitude": 1}
-    )
-
-    quake_points = []
-    for eq in earthquakes:
-        try:
-            lat = float(eq["latitude"])
-            lon = float(eq["longitude"])
-            mag = float(eq["magnitude"])
-            quake_points.append([lat, lon, mag])
-        except:
-            continue
-
-    if not quake_points:
-        print("⚠️ 沒有足夠地震資料")
-        return
-
-    # 建立地圖（以台灣為中心）
-    m = folium.Map(location=[23.5, 121], zoom_start=6)
-
-    # 加上熱區圖層
-    HeatMap(quake_points, radius=15, blur=10, max_zoom=13).add_to(m)
-
-    # 儲存地圖 HTML
-    os.makedirs("static", exist_ok=True)
-    m.save(output_path)
-    print(f"✅ 熱區地圖儲存完成：{output_path}")
-
-def forecast_magnitude_and_plot(n_periods=5, save_path="static/forecast_magnitude.png"):
-    # 字體設定
-    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
-    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
-
-    fm.fontManager.addfont(font_path)
-    font_prop = fm.FontProperties(fname=font_path)
-    plt.rcParams['font.family'] = font_prop.get_name()
-
-    if os.path.exists(font_path):
-        font_prop = fm.FontProperties(fname=font_path)
-        plt.rcParams['font.family'] = font_prop.get_name()
-        print(f"✅ 使用中文字體：{font_prop.get_name()}")
-    else:
-        print("⚠️ 找不到字體：", font_path)
-        plt.rcParams['font.family'] = 'sans-serif'
-
-    # MongoDB 連線
-    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
-    db = client["earthquake_db"]
-    collection = db["earthquakes"]
-
-    # 1. 讀取資料
-    cursor = collection.find({}, {"origin_time": 1, "magnitude": 1, "_id": 0})
-    df = pd.DataFrame(list(cursor))
-    if df.empty:
-        return [], None
-
-    # 2. 前處理
-    df["origin_time"] = pd.to_datetime(df["origin_time"], errors='coerce')
-    df = df.dropna(subset=["origin_time", "magnitude"])
-    df = df.sort_values("origin_time").set_index("origin_time")
-
-    # 3. 模型訓練與預測
-    try:
-        model = auto_arima(df["magnitude"], seasonal=False, suppress_warnings=True)
-        forecast = model.predict(n_periods=n_periods)
-
-        # 4. 畫圖
-        plt.figure(figsize=(10, 5))
-        df["magnitude"].plot(label="歷史資料")
-        forecast_index = pd.date_range(df.index[-1], periods=n_periods + 1, freq='D')[1:]
-        pd.Series(forecast, index=forecast_index).plot(label="預測", linestyle="--")
-        plt.title("地震規模預測")
-        plt.xlabel("時間")
-        plt.ylabel("芮氏規模")
-        plt.legend()
-        plt.tight_layout()
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path)
-        plt.close()
-        return forecast.tolist(), save_path
-    except Exception as e:
-        print("❌ 預測錯誤：", e)
-        return [], None

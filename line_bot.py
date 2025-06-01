@@ -5,9 +5,8 @@ from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
-from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart
+from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
-from generate_chart import generate_max_magnitude_chart, forecast_magnitude_and_plot
 
 import re
 from datetime import datetime, UTC
@@ -49,11 +48,17 @@ def handle_webhook():
                     if user_message.lower() in ["查詢功能"]:
                         reply_text = (
                             "🤖 地震查詢機器人使用說明：\n"
+                            "\n🔍 基本查詢\n"
                             "🔹 輸入「地震」：查詢最近的地震資料\n"
-                            "🔹 輸入「地震 花蓮」：查詢花蓮地區的地震\n"
-                            "🔹 輸入「地震 >5」：查詢規模大於5的地震\n"
+                            "🔹 輸入「地震 花蓮」：查詢花蓮地區的地震（可替換為其他地名）\n"
+                            "🔹 輸入「地震 >5」：查詢規模大於 5 的地震（支援 >、<、=）\n"
                             "🔹 輸入「最新」：查詢最新一筆地震紀錄\n"
-                            "🔹 輸入「地震地圖」：查詢最近的地震規模折線圖\n"
+                            "\n📊 圖表功能\n"
+                            "🔹 輸入「地震地圖」：查看最近幾天的地震規模折線圖\n"
+                            "🔹 輸入「地震統計」：查詢最近的地震規模折線圖\n"
+                            "🔹 輸入「地震統計圖」：查看最近 10 筆地震的規模折線圖\n"
+                            "🔹 輸入「地震平均規模圖」：查看最近 7 天每日平均地震規模圖\n"
+                            "🔹 輸入「地震最大規模圖」：查看最近 7 天每日最大地震規模圖\n"
                             "🔹 更多功能開發中，敬請期待！"
                         )
                         messages = [TextMessage(text=reply_text)]
@@ -166,25 +171,6 @@ def handle_webhook():
                                 preview_image_url=image_url
                             )
                         ]
-                    
-                    elif user_message == "地震熱區圖":
-                        heatmap_url = "https://earthquake-linebot-production.up.railway.app/heatmap"
-                        reply_text = f"🔍 點擊下方連結查看互動式地震熱區圖：\n{heatmap_url}"
-                        messages = [TextMessage(text=reply_text)]
-
-                    elif user_message == "地震預測圖":
-                        forecast, image_path = forecast_magnitude_and_plot()
-                        if forecast and image_path:
-                            image_url = "https://earthquake-linebot-production.up.railway.app/static/forecast_magnitude.png"
-                            messages = [
-                                ImageMessage(
-                                    original_content_url=image_url,
-                                    preview_image_url=image_url
-                                )
-                            ]
-                        else:
-                            messages = [TextMessage(text="⚠️ 無法進行地震預測，資料不足或發生錯誤。")]
-
 
                     else:
                         reply_text = "⚠️ 無法識別的指令，請輸入「幫助」查看使用說明。"

@@ -1,12 +1,7 @@
-# 順序很重要：先裝 numpy 和編譯會用到的庫
-numpy==1.24.4
-scikit-learn==1.3.2
 pandas
 matplotlib
-folium
 flask
 pymongo[srv]
 certifi
 requests
 line-bot-sdk>=3.17.1
-pmdarima==2.0.4
