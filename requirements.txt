@@ -6,4 +6,5 @@ requests
 matplotlib
 pandas
 folium
+pmdarima
 line-bot-sdk>=3.17.1
