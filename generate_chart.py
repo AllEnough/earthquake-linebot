@@ -1,7 +1,7 @@
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
-from datetime import datetime, UTC, timedelta, timezone
+from datetime import datetime, UTC, timedelta
 import pandas as pd
 import os
 
@@ -72,17 +72,28 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     # 初始化每天的計數器
     date_counts = {}
     for i in range(days):
-        date = (start_date + timedelta(days=i)).astimezone(timezone(timedelta(hours=8))).date()
+        date = (start_date + timedelta(days=i)).date()
         date_counts[date] = 0
 
     # MongoDB 連線
     client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
     db = client["earthquake_db"]
 
+    """將字串格式的 origin_time 欄位轉換為 datetime"""
+    for doc in db["earthquakes"].find({"origin_time": {"$type": "string"}}):
+        try:
+            new_time = datetime.strptime(doc["origin_time"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)
+            db["earthquakes"].update_one(
+                {"_id": doc["_id"]},
+                {"$set": {"origin_time": new_time}}
+            )
+        except Exception as e:
+            print(f"❌ 轉換失敗：{doc['_id']} - {e}")
+
     # 查詢資料
     results = db["earthquakes"].find({"origin_time": {"$gte": start_date}})
     for quake in results:
-        origin_time = origin_time.astimezone(timezone(timedelta(hours=8)))
+        origin_time = quake.get("origin_time")
         if origin_time:
             date = origin_time.date()
             if date in date_counts:
@@ -92,7 +103,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     dates = list(date_counts.keys())
     counts = list(date_counts.values())
 
-   # 畫圖
+    # 畫圖
     plt.figure(figsize=(10, 4))
     plt.plot(dates, counts, marker='o', linestyle='-', color='blue')
     plt.title("每日地震次數統計")
@@ -100,9 +111,6 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     plt.ylabel("地震次數")
     plt.grid(True)
     plt.tight_layout()
-
-    # ✅ 確保 static 資料夾存在
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # 儲存圖片
     plt.savefig(output_path)
