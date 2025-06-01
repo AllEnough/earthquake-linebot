@@ -113,6 +113,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     plt.tight_layout()
 
     # 儲存圖片
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     plt.savefig(output_path)
     plt.close()
 
