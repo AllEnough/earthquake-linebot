@@ -1,6 +1,8 @@
-# 在 earthquake_analysis.py 建立這些函式
-from config import db
 from datetime import datetime, timedelta, UTC
+from pymongo import MongoClient
+# MongoDB 連線
+client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+db = client["earthquake_db"]
 
 def get_average_magnitude():
     pipeline = [
