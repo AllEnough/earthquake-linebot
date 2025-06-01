@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>地震地圖視覺化</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+        }
+        h2 {
+            text-align: center;
+            background-color: #f2f2f2;
+            padding: 15px;
+            margin: 0;
+        }
+        #map {
+            height: calc(100vh - 60px);
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h2>🌏 地震震央互動地圖</h2>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script>
+        const quakeData = {{ quake_data | tojson }};
+        const map = L.map('map').setView([23.7, 121], 7);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '📍 資料來源：OpenStreetMap & 中央氣象局'
+        }).addTo(map);
+
+        const markers = L.markerClusterGroup();
+
+        if (quakeData.length === 0) {
+            alert("⚠️ 目前沒有包含經緯度的地震資料，請稍後再試");
+        }
+
+        quakeData.forEach(q => {
+            const marker = L.marker([q.lat, q.lon]).bindPopup(q.info);
+            markers.addLayer(marker);
+        });
+
+        map.addLayer(markers);
+    </script>
+</body>
+</html>

@@ -78,3 +78,26 @@ def index():
         total_count=total_count,
         with_coords_count=with_coords_count
     )
+
+
+@web_page.route('/map')
+def earthquake_map():
+    quakes = list(collection.find({
+        "latitude": {"$exists": True},
+        "longitude": {"$exists": True}
+    }, {
+        "latitude": 1,
+        "longitude": 1,
+        "epicenter": 1,
+        "origin_time": 1,
+        "magnitude": 1,
+        "depth": 1
+    }))
+
+    quake_data = [{
+        "lat": q["latitude"],
+        "lon": q["longitude"],
+        "info": f"📍 {q.get('epicenter', '未知地點')}<br>⏰ {q.get('origin_time')}<br>📏 規模: {q.get('magnitude')}<br>🌊 深度: {q.get('depth')} 公里"
+    } for q in quakes]
+
+    return render_template("map.html", quake_data=quake_data)
