@@ -32,13 +32,6 @@ required_vars = [
     DOMAIN
 ]
 
-print("LINE_CHANNEL_SECRET =", repr(LINE_CHANNEL_SECRET))
-print("LINE_CHANNEL_ACCESS_TOKEN =", repr(LINE_CHANNEL_ACCESS_TOKEN))
-print("MONGO_URI =", repr(MONGO_URI))
-print("CWA_API_KEY =", repr(CWA_API_KEY))
-print("DOMAIN =", repr(DOMAIN))
-
-
 if not all(required_vars):
     raise EnvironmentError("❌ 缺少必要的 .env 環境變數設定，請檢查 .env 檔案")
 

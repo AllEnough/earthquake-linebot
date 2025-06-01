@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, UTC
 import os
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 from database import get_earthquake_collection
 from font_utils import set_chinese_font

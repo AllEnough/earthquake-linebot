@@ -111,9 +111,10 @@ def handle_query_custom(user_message):
         keyword = pattern_epicenter.group(1)
         query["epicenter"] = {"$regex": keyword}
 
-    results = db["earthquakes"].find(query).sort("origin_time", -1).limit(5)
-    if results.count() == 0:
+    results = list(db["earthquakes"].find(query).sort("origin_time", -1).limit(5))
+    if not results:
         return [TextMessage(text="⚠️ 查無符合條件的地震資料。")]
+
 
     messages = []
     for quake in results:
@@ -150,10 +151,9 @@ def handle_query_advanced(user_message):
     else:
         return [TextMessage(text="⚠️ 請使用格式：\n查詢 [地點]\n或\n查詢 [地點] [起始日] [結束日]")]
 
-    results = db["earthquakes"].find(query).sort("origin_time", -1).limit(5)
-
-    if results.count() == 0:
-        return [TextMessage(text="❌ 查無符合條件的地震資料。")]
+    results = list(db["earthquakes"].find(query).sort("origin_time", -1).limit(5))
+    if not results:
+        return [TextMessage(text="⚠️ 查無符合條件的地震資料。")]
 
     messages = []
     for quake in results:

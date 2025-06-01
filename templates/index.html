@@ -113,7 +113,7 @@
         </tr>
         {% for quake in quakes %}
         <tr>
-            <td>{{ quake.origin_time.strftime('%Y-%m-%d %H:%M:%S') if quake.origin_time else 'N/A' }}</td>
+            <td>{{ quake.origin_time or 'N/A' }}</td>
             <td>{{ quake.epicenter or '暫無資料' }}</td>
             <td>{{ quake.depth or 'N/A' }}</td>
             <td>{{ quake.magnitude or 'N/A' }}</td>
