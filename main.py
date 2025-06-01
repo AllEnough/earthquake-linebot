@@ -5,7 +5,6 @@ from earthquake import quake_check_loop
 from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
 from web_page import web_page
-from generate_chart import generate_earthquake_heatmap_folium
 
 from flask import jsonify
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
