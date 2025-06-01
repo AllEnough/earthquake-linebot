@@ -17,6 +17,8 @@ MONGO_URI = os.getenv("MONGO_URI")
 CWA_API_KEY = os.getenv("CWA_API_KEY")
 DOMAIN = os.getenv("DOMAIN")  # ✅ 用於圖表網址等地方
 
+print("ENV TEST CWA_API_KEY:", repr(os.getenv("CWA_API_KEY")))
+
 # ✅ 檢查環境變數是否齊全
 required_vars = [
     LINE_CHANNEL_SECRET,
@@ -25,6 +27,13 @@ required_vars = [
     CWA_API_KEY,
     DOMAIN
 ]
+
+print("LINE_CHANNEL_SECRET =", repr(LINE_CHANNEL_SECRET))
+print("LINE_CHANNEL_ACCESS_TOKEN =", repr(LINE_CHANNEL_ACCESS_TOKEN))
+print("MONGO_URI =", repr(MONGO_URI))
+print("CWA_API_KEY =", repr(CWA_API_KEY))
+print("DOMAIN =", repr(DOMAIN))
+
 
 if not all(required_vars):
     raise EnvironmentError("❌ 缺少必要的 .env 環境變數設定，請檢查 .env 檔案")
