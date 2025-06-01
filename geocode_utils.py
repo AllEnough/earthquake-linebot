@@ -6,7 +6,23 @@ from logger import logger
 # 用於避免重複查詢同一地名
 _geocode_cache = {}
 
+def clean_location_name(name: str) -> str:
+    """
+    嘗試擷取地震震央名稱中括號內的地名，或直接回傳原始值
+    """
+    if "(" in name and ")" in name:
+        try:
+            return name.split("(", 1)[-1].split(")", 1)[0].strip()
+        except:
+            pass
+    return name.strip()
+
 def get_coordinates_from_text(location_name):
+    """
+    使用 Nominatim API 將中文地點轉換為 (lat, lon)
+    """
+    location_name = clean_location_name(location_name)
+
     if location_name in _geocode_cache:
         return _geocode_cache[location_name]
 
@@ -18,7 +34,7 @@ def get_coordinates_from_text(location_name):
         "accept-language": "zh-TW"
     }
     headers = {
-        "User-Agent": "earthquake-line-bot/1.0 (sodiqademolaolagunju@gmail.com)"
+        "User-Agent": "earthquake-line-bot/1.0 (your@email.com)"
     }
 
     try:
@@ -29,7 +45,7 @@ def get_coordinates_from_text(location_name):
             lon = float(data[0]["lon"])
             _geocode_cache[location_name] = (lat, lon)
             logger.info(f"📍 已解析地點：{location_name} → ({lat}, {lon})")
-            time.sleep(1)  # 避免觸發 API 限速
+            time.sleep(1)  # 尊重 API 限速
             return lat, lon
         else:
             logger.warning(f"⚠️ 找不到地點：{location_name}")

@@ -5,13 +5,13 @@ import pandas as pd
 import os
 
 from config import db
-from font_utils import load_font
+from font_utils import set_chinese_font
 from logger import logger
 
 
 def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", days=7):
     logger.info("📊 產生每日最大地震規模圖中...")
-    load_font()
+    set_chinese_font()
 
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$exists": True, "$ne": None}},

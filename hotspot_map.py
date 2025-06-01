@@ -7,12 +7,12 @@ import os
 
 from mpl_toolkits.basemap import Basemap
 from database import get_earthquake_collection
-from font_utils import load_font
+from font_utils import set_chinese_font
 from logger import logger
 
 def generate_epicenter_heatmap(days=30, output_path="static/heatmap.png"):
     logger.info("📍 開始產生震央熱區圖...")
-    load_font()
+    set_chinese_font()
 
     collection = get_earthquake_collection()
     start_time = datetime.now(UTC) - timedelta(days=days)

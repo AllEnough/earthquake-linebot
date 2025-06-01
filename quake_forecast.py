@@ -5,14 +5,14 @@ from datetime import datetime, UTC
 import os
 
 from database import get_earthquake_collection
-from font_utils import load_font
+from font_utils import set_chinese_font
 from logger import logger
 
 from pmdarima import auto_arima
 
 def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_predict.png"):
     logger.info("🤖 開始訓練 ARIMA 模型進行地震規模預測...")
-    load_font()
+    set_chinese_font()
 
     collection = get_earthquake_collection()
     data = []
