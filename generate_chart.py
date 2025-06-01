@@ -1,7 +1,7 @@
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 from pymongo import MongoClient
-from datetime import datetime, UTC, timedelta
+from datetime import datetime, UTC, timedelta, timezone
 import pandas as pd
 import os
 
@@ -72,7 +72,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     # 初始化每天的計數器
     date_counts = {}
     for i in range(days):
-        date = (start_date + timedelta(days=i)).date()
+        date = (start_date + timedelta(days=i)).astimezone(timezone(timedelta(hours=8))).date()
         date_counts[date] = 0
 
     # MongoDB 連線
@@ -82,7 +82,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
     # 查詢資料
     results = db["earthquakes"].find({"origin_time": {"$gte": start_date}})
     for quake in results:
-        origin_time = quake.get("origin_time")
+        origin_time = origin_time.astimezone(timezone(timedelta(hours=8)))
         if origin_time:
             date = origin_time.date()
             if date in date_counts:
