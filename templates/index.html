@@ -75,6 +75,10 @@
         <button type="submit">查詢</button>
     </form>
 
+    <p style="text-align: center; font-size: 18px; margin-top: 10px;">
+        📊 資料總覽：共有 {{ total_count }} 筆地震資料，其中 {{ with_coords_count }} 筆含有經緯度資訊。
+    </p>
+
     <h2>📈 地震規模預測圖（未來 3 天）</h2>
     <img src="/static/chart_predict.png" alt="地震預測圖" class="chart">
 

@@ -59,6 +59,13 @@ def index():
 🔹 「地震摘要」➡️ 一週地震活動總結
 """
 
+    # 取得地震資料的總數和有經緯度的數量
+    total_count = collection.count_documents({})
+    with_coords_count = collection.count_documents({
+        "latitude": {"$exists": True},
+        "longitude": {"$exists": True}
+    })
+
     return render_template(
         'index.html',
         quakes=quakes,
@@ -67,5 +74,7 @@ def index():
         end_date=end_date_str,
         all_epicenters=sorted(all_epicenters),
         summary=summary,
-        line_help=line_help
+        line_help=line_help,
+        total_count=total_count,
+        with_coords_count=with_coords_count
     )
