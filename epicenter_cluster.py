@@ -6,13 +6,13 @@ from datetime import datetime, timedelta, UTC
 import os
 
 from database import get_earthquake_collection
-from font_utils import set_chinese_font
+from font_utils import load_font
 from logger import logger
 
 
 def generate_epicenter_cluster_chart(days=30, k=4, output_path="static/epicenter_clusters.png"):
     logger.info("🔬 開始進行震央群聚分析...")
-    set_chinese_font()
+    load_font()
 
     collection = get_earthquake_collection()
     start_time = datetime.now(UTC) - timedelta(days=days)

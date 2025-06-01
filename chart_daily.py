@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import os
 
 from config import db
-from font_utils import set_chinese_font
+from font_utils import load_font
 from logger import logger
 
 def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png"):
     logger.info("📊 產生每日地震次數統計圖中...")
-    set_chinese_font()
+    load_font()
 
     end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
@@ -24,13 +24,7 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
                 date_counts[date] += 1
 
     plt.figure(figsize=(10, 4))
-    plt.plot(
-        list(date_counts.keys()),
-        list(date_counts.values()),
-        marker='o',
-        linestyle='-',
-        color='blue'
-    )
+    plt.plot(list(date_counts.keys()), list(date_counts.values()), marker='o', linestyle='-', color='blue')
     plt.title("每日地震次數統計")
     plt.xlabel("日期")
     plt.ylabel("地震次數")
