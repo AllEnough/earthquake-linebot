@@ -5,9 +5,9 @@ from linebot.v3.messaging import MessagingApi, ApiClient
 from linebot.v3.messaging.models import TextMessage, ReplyMessageRequest
 from config import parser, configuration, collection, db
 from linebot.v3.messaging.models import ImageMessage
-from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart, generate_max_magnitude_chart
+from generate_chart import generate_chart, generate_daily_count_chart, generate_avg_magnitude_chart
 from earthquake_analysis import get_average_magnitude, get_max_magnitude, get_recent_earthquake_count
-from magnitude_forecast import forecast_magnitude_and_plot
+from generate_chart import generate_max_magnitude_chart, forecast_magnitude_and_plot
 
 import re
 from datetime import datetime, UTC

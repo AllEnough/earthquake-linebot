@@ -5,6 +5,7 @@ from datetime import datetime, UTC, timedelta
 import pandas as pd
 import folium
 from folium.plugins import HeatMap
+from pmdarima import auto_arima
 import os
 
 def generate_chart():
@@ -264,3 +265,59 @@ def generate_earthquake_heatmap_folium(output_path='static/heatmap.html', days=7
     os.makedirs("static", exist_ok=True)
     m.save(output_path)
     print(f"✅ 熱區地圖儲存完成：{output_path}")
+
+def forecast_magnitude_and_plot(n_periods=5, save_path="static/forecast_magnitude.png"):
+    # 字體設定
+    base_dir = os.path.dirname(__file__)  # 取得當前檔案所在資料夾
+    font_path = os.path.join(base_dir, "fonts/NotoSansTC-Regular.ttf")
+
+    fm.fontManager.addfont(font_path)
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.family'] = font_prop.get_name()
+
+    if os.path.exists(font_path):
+        font_prop = fm.FontProperties(fname=font_path)
+        plt.rcParams['font.family'] = font_prop.get_name()
+        print(f"✅ 使用中文字體：{font_prop.get_name()}")
+    else:
+        print("⚠️ 找不到字體：", font_path)
+        plt.rcParams['font.family'] = 'sans-serif'
+
+    # MongoDB 連線
+    client = MongoClient("mongodb+srv://AllEnough:password052619@cluster0.wqlbeek.mongodb.net/?retryWrites=true&w=majority&tls=true")
+    db = client["earthquake_db"]
+    collection = db["earthquakes"]
+
+    # 1. 讀取資料
+    cursor = collection.find({}, {"origin_time": 1, "magnitude": 1, "_id": 0})
+    df = pd.DataFrame(list(cursor))
+    if df.empty:
+        return [], None
+
+    # 2. 前處理
+    df["origin_time"] = pd.to_datetime(df["origin_time"], errors='coerce')
+    df = df.dropna(subset=["origin_time", "magnitude"])
+    df = df.sort_values("origin_time").set_index("origin_time")
+
+    # 3. 模型訓練與預測
+    try:
+        model = auto_arima(df["magnitude"], seasonal=False, suppress_warnings=True)
+        forecast = model.predict(n_periods=n_periods)
+
+        # 4. 畫圖
+        plt.figure(figsize=(10, 5))
+        df["magnitude"].plot(label="歷史資料")
+        forecast_index = pd.date_range(df.index[-1], periods=n_periods + 1, freq='D')[1:]
+        pd.Series(forecast, index=forecast_index).plot(label="預測", linestyle="--")
+        plt.title("地震規模預測")
+        plt.xlabel("時間")
+        plt.ylabel("芮氏規模")
+        plt.legend()
+        plt.tight_layout()
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+        plt.close()
+        return forecast.tolist(), save_path
+    except Exception as e:
+        print("❌ 預測錯誤：", e)
+        return [], None
