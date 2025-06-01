@@ -3,10 +3,10 @@ flask
 pymongo[srv]
 certifi
 requests
-matplotlib
-pandas
-folium
-pmdarima==2.0.4
 numpy==1.24.4
 scikit-learn==1.3.2
+pandas
+folium
+matplotlib
+pmdarima==2.0.4
 line-bot-sdk>=3.17.1
