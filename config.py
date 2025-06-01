@@ -10,12 +10,18 @@ from logger import logger
 # ✅ 載入 .env 檔案
 load_dotenv()
 
+def clean_env(key):
+    val = os.getenv(key)
+    if val is None:
+        return None
+    return val.strip().strip('"').strip("'")
+
 # ✅ 環境變數
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET")
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-MONGO_URI = os.getenv("MONGO_URI")
-CWA_API_KEY = os.getenv("CWA_API_KEY")
-DOMAIN = os.getenv("DOMAIN")  # ✅ 用於圖表網址等地方
+LINE_CHANNEL_SECRET = clean_env("LINE_CHANNEL_SECRET")
+LINE_CHANNEL_ACCESS_TOKEN = clean_env("LINE_CHANNEL_ACCESS_TOKEN")
+MONGO_URI = clean_env("MONGO_URI")
+CWA_API_KEY = clean_env("CWA_API_KEY")
+DOMAIN = clean_env("DOMAIN")  # ✅ 用於圖表網址等地方
 
 print("ENV TEST CWA_API_KEY:", repr(os.getenv("CWA_API_KEY")))
 
