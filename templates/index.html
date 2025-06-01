@@ -3,33 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <title>地震資料查詢系統</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            font-family: "Segoe UI", sans-serif;
+            font-family: "Segoe UI", "Noto Sans TC", sans-serif;
             background-color: #f9f9f9;
             padding: 20px;
-        }
-        h1 {
             color: #333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #444;
+        }
+        form {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input, select, button {
+            padding: 8px;
+            margin: 4px;
+            font-size: 16px;
         }
         table {
             border-collapse: collapse;
             width: 100%;
             background-color: #fff;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
         }
         th, td {
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
         }
         th {
             background-color: #e0e0e0;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .chart {
+            display: block;
+            margin: 30px auto;
+            max-width: 90%;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 600px) {
+            table, th, td {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>近期地震資料</h1>
+    <h1>地震資料查詢系統</h1>
+
+    <form method="get" action="/">
+        <label>地區：</label>
+        <select name="keyword">
+            <option value="">全部</option>
+            {% for city in all_epicenters %}
+                <option value="{{ city }}" {% if keyword == city %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+        </select>
+        <label>起始日期：</label>
+        <input type="date" name="start_date" value="{{ start_date or '' }}">
+        <label>結束日期：</label>
+        <input type="date" name="end_date" value="{{ end_date or '' }}">
+        <button type="submit">查詢</button>
+    </form>
+
+    <h2>📈 地震規模預測圖（未來 3 天）</h2>
+    <img src="/static/chart_predict.png" alt="地震預測圖" class="chart">
+
+    <h2>🔥 震央熱區圖（近 30 天）</h2>
+    <img src="/static/heatmap.png" alt="地震熱區圖" class="chart">
+
+    <h2>🔬 震央群聚分析圖（KMeans 分群）</h2>
+    <img src="/static/epicenter_clusters.png" alt="震央群聚圖" class="chart">
+
+    <h2>📝 地震摘要報告（近 7 天）</h2>
+    <div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
+        {{ summary }}
+    </div>
+
+    <h2>🤖 LINE Bot 使用說明</h2>
+    <details style="max-width: 800px; margin: 20px auto; background: #eef; padding: 15px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
+        <summary style="font-size: 18px; font-weight: bold; cursor: pointer;">點我展開 / 收合</summary>
+        <div style="white-space: pre-wrap; padding-top: 10px;">
+            {{ line_help }}
+        </div>
+    </details>
+
     <table>
         <tr>
             <th>發生時間</th>
@@ -39,10 +106,10 @@
         </tr>
         {% for quake in quakes %}
         <tr>
-            <td>{{ quake.origin_time }}</td>
+            <td>{{ quake.origin_time.strftime('%Y-%m-%d %H:%M:%S') if quake.origin_time else 'N/A' }}</td>
             <td>{{ quake.epicenter or '暫無資料' }}</td>
-            <td>{{ quake.depth }}</td>
-            <td>{{ quake.magnitude }}</td>
+            <td>{{ quake.depth or 'N/A' }}</td>
+            <td>{{ quake.magnitude or 'N/A' }}</td>
         </tr>
         {% endfor %}
     </table>
