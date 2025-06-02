@@ -21,8 +21,8 @@ def parse_quake_record(eq):
         # 嘗試補經緯度（使用 Nominatim API）
         lat, lon = get_coordinates_from_text(epicenter)
         if lat and lon:
-            quake['latitude'] = lat
-            quake['longitude'] = lon
+            quake['lat'] = lat
+            quake['lon'] = lon
 
         # 檢查欄位完整性
         if None in [quake['origin_time'], quake['epicenter'], quake['depth'], quake['magnitude']]:
