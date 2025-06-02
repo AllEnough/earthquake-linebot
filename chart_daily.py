@@ -5,9 +5,11 @@ import os
 
 from config import db
 from logger import logger
+from earthquake_analysis import fix_origin_time_format
 
 def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png"):
     logger.info("📊 產生每日地震次數統計圖中...")
+    fix_origin_time_format()
 
     end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)

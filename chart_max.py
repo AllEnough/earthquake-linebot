@@ -6,10 +6,12 @@ import os
 
 from config import db
 from logger import logger
+from earthquake_analysis import fix_origin_time_format
 
 
 def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", days=7):
     logger.info("📊 產生每日最大地震規模圖中...")
+    fix_origin_time_format()
 
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$exists": True, "$ne": None}},
