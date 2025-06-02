@@ -7,14 +7,18 @@ from logger import logger
 _geocode_cache = {}
 
 def clean_location_name(name: str) -> str:
+    name = name.strip()
+    # 移除「位於」開頭
+    if name.startswith("位於"):
+        name = name[2:]
+    # 排除難以地理定位的描述
+    if any(keyword in name for keyword in ["海域", "近海", "公里", "公尺", "方", "附近"]):
+        return ""
     if "(" in name and ")" in name:
         try:
             return name.split("(", 1)[-1].split(")", 1)[0].strip()
         except:
             pass
-    # 新增排除「位於」開頭
-    if name.startswith("位於"):
-        return name[2:].strip()
     return name.strip()
     
 
