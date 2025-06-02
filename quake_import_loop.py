@@ -6,8 +6,9 @@ from logger import logger
 
 from quake_import import fetch_and_store_earthquake_data
 from quake_forecast import generate_forecast_chart
-from hotspot_map import generate_epicenter_heatmap
-from epicenter_cluster import generate_epicenter_cluster_chart
+from chart_daily import generate_daily_count_chart
+from chart_avg import generate_avg_magnitude_chart
+from chart_max import generate_max_magnitude_chart
 from quake_summary import get_text_summary
 from line_push_utils import push_messages_to_all_users
 
@@ -28,8 +29,9 @@ def run_daily_forecast_loop():
     while True:
         logger.info("📊 每日更新地震分析圖表中...")
         generate_forecast_chart()
-        generate_epicenter_heatmap()
-        generate_epicenter_cluster_chart()
+        generate_daily_count_chart()
+        generate_avg_magnitude_chart()
+        generate_max_magnitude_chart()
         logger.info("✅ 圖表更新完成，等待 24 小時...")
         time.sleep(86400)
 

@@ -60,8 +60,6 @@
 <body>
     <h1>地震資料查詢系統</h1>
 
-    <p style="text-align:center;"><a href="/map">🗺️ 點我查看地震互動地圖</a></p>
-
     <form method="get" action="/">
         <label>地區：</label>
         <select name="keyword">
@@ -77,19 +75,17 @@
         <button type="submit">查詢</button>
     </form>
 
-    <p style="text-align:center; font-size: 18px; margin-top: 10px;">
-        📊 目前資料筆數：{{ total_count }} 筆，已含座標：{{ coord_count }} 筆
-    </p>
-
-
     <h2>📈 地震規模預測圖（未來 3 天）</h2>
     <img src="/static/chart_predict.png" alt="地震預測圖" class="chart">
 
-    <h2>🔥 震央熱區圖（近 30 天）</h2>
-    <img src="/static/heatmap.png" alt="地震熱區圖" class="chart">
+    <h2>📊 每日地震次數統計圖</h2>
+    <img src="/static/chart_daily.png" alt="每日地震次數圖" class="chart">
 
-    <h2>🔬 震央群聚分析圖（KMeans 分群）</h2>
-    <img src="/static/epicenter_clusters.png" alt="震央群聚圖" class="chart">
+    <h2>📊 每日地震平均規模圖</h2>
+    <img src="/static/chart_avg.png" alt="平均地震規模圖" class="chart">
+
+    <h2>📊 每日最大規模地震圖</h2>
+    <img src="/static/chart_max.png" alt="最大地震規模圖" class="chart">
 
     <h2>📝 地震摘要報告（近 7 天）</h2>
     <div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
