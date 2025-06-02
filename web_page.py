@@ -67,6 +67,7 @@ def index():
         summary=summary,
         line_help=line_help,
         now=now,
+        timedelta=timedelta,  # ✅ 加這行
         show_heatmap_button=True  # ✅ 傳給模板啟用熱力圖按鈕
     )
 
