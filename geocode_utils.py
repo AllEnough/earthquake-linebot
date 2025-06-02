@@ -8,20 +8,19 @@ _geocode_cache = {}
 
 def clean_location_name(name: str) -> str:
     name = name.strip()
-    # 移除「位於」開頭
     if name.startswith("位於"):
         name = name[2:]
-    # 排除難以地理定位的描述
     if any(keyword in name for keyword in ["海域", "近海", "公里", "公尺", "方", "附近"]):
         return ""
     if "(" in name and ")" in name:
         try:
-            return name.split("(", 1)[-1].split(")", 1)[0].strip()
+            inside = name.split("(", 1)[-1].split(")", 1)[0].strip()
+            if inside.startswith("位於"):
+                name = inside[2:]
         except:
             pass
     return name.strip()
 
-# 自訂補丁：無法被 API 解析的地名
 manual_fix = {
     "花蓮縣近海": (23.8, 121.6),
     "臺灣東部海域": (24.0, 122.2),
@@ -31,19 +30,18 @@ manual_fix = {
     "高雄市那瑪夏區": (23.3, 120.8),
     "臺東縣海端鄉": (23.0, 121.1),
     "苗栗縣南庄鄉": (24.6, 121.0),
+    "臺南市東山區": (23.3, 120.5),
+    "宜蘭縣宜蘭市": (24.75, 121.75),
+    "嘉義縣大埔鄉": (23.3, 120.6)
 }
 
 def get_coordinates_from_text(location_name):
-    """
-    使用 Google Geocoding API 將中文地點轉換為 (lat, lon)
-    """
     location_name = clean_location_name(location_name)
     location_name = location_name.replace("台", "臺")
 
     if not location_name:
         return None, None
 
-    # 優先查找手動修正表
     if location_name in manual_fix:
         lat, lon = manual_fix[location_name]
         logger.info(f"📍 已從補丁表解析地點：{location_name} → ({lat}, {lon})")
