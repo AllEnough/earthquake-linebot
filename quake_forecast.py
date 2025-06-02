@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime, UTC
 import os
 
-from font_utils import use_custom_font_from_file
 from database import get_earthquake_collection
 from logger import logger
 
@@ -12,7 +11,6 @@ from pmdarima import auto_arima
 
 def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_predict.png"):
     logger.info("🤖 開始訓練 ARIMA 模型進行地震規模預測...")
-    use_custom_font_from_file()
 
     collection = get_earthquake_collection()
     data = []

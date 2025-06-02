@@ -5,13 +5,11 @@ import pandas as pd
 import os
 
 from config import db
-from font_utils import use_custom_font_from_file
 from logger import logger
 
 
 def generate_avg_magnitude_chart(output_path="static/chart_avg_magnitude.png", days=7):
     logger.info("📊 產生每日平均地震規模圖中...")
-    use_custom_font_from_file()
 
     earthquakes = db["earthquakes"].find(
         {"origin_time": {"$exists": True, "$ne": None}},

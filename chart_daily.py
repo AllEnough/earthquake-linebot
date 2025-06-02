@@ -4,12 +4,10 @@ import matplotlib.pyplot as plt
 import os
 
 from config import db
-from font_utils import use_custom_font_from_file
 from logger import logger
 
 def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png"):
     logger.info("📊 產生每日地震次數統計圖中...")
-    use_custom_font_from_file()
 
     end_date = datetime.now(UTC)
     start_date = end_date - timedelta(days=days)
