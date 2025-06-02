@@ -11,6 +11,10 @@ from epicenter_cluster import generate_epicenter_cluster_chart
 from quake_summary import get_text_summary
 from line_push_utils import push_messages_to_all_users
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
 # ✅ 每 5 分鐘抓資料
 def run_quake_import_loop(interval_minutes=5):
     while True:

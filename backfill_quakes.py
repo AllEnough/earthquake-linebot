@@ -7,6 +7,10 @@ from quake_parser import parse_quake_record
 from config import MONGO_URI, CWA_API_KEY
 import certifi
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
 # 初始化 MongoDB
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
 db = client["earthquake"]

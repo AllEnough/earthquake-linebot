@@ -13,6 +13,10 @@ import os
 import sys
 import io
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
 # ✅ 修正輸出為 UTF-8（避免 Heroku/Railway log 中文亂碼）
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 

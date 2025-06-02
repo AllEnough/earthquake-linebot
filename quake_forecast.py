@@ -7,6 +7,10 @@ import os
 from database import get_earthquake_collection
 from logger import logger
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
 from pmdarima import auto_arima
 
 def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_predict.png"):

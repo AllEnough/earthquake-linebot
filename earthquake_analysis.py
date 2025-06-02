@@ -3,6 +3,10 @@ from datetime import datetime, timedelta, UTC
 from database import get_earthquake_collection
 from logger import logger
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+
 # ✅ 統一取得地震資料集合
 collection = get_earthquake_collection()
 

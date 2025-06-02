@@ -8,6 +8,9 @@ import os
 from database import get_earthquake_collection
 from logger import logger
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 
 def generate_epicenter_cluster_chart(days=30, k=4, output_path="static/epicenter_clusters.png"):
     logger.info("🔬 開始進行震央群聚分析...")
