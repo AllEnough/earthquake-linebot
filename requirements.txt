@@ -13,9 +13,13 @@ line-bot-sdk>=3.17.1
 # 📊 圖表與資料處理
 pandas
 matplotlib
+seaborn
 
 # 📈 AI 模型預測
 pmdarima
+scikit-learn
+
+# ⏳ 時區處理（Python 3.11+ 已內建 UTC）
 
 # 🔁 定時任務
 schedule
