@@ -5,8 +5,8 @@ from sklearn.cluster import KMeans
 from datetime import datetime, timedelta, UTC
 import os
 
-from database import get_earthquake_collection
 from font_utils import use_custom_font_from_file
+from database import get_earthquake_collection
 from logger import logger
 
 

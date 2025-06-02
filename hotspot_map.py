@@ -6,8 +6,8 @@ import numpy as np
 import os
 
 from mpl_toolkits.basemap import Basemap
-from database import get_earthquake_collection
 from font_utils import use_custom_font_from_file
+from database import get_earthquake_collection
 from logger import logger
 
 def generate_epicenter_heatmap(days=30, output_path="static/heatmap.png"):
