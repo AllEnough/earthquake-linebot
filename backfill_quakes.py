@@ -1,4 +1,3 @@
-# backfill_quakes.py
 from datetime import datetime, timedelta, UTC
 import requests
 from pymongo import MongoClient
@@ -6,10 +5,9 @@ from logger import logger
 from quake_parser import parse_quake_record
 from config import MONGO_URI, CWA_API_KEY
 import certifi
-
 import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 # 初始化 MongoDB
 client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
@@ -26,8 +24,12 @@ start_date = end_date - timedelta(days=30)
 
 logger.info("🌐 正在抓取中央氣象局地震資料...")
 params = {"format": "JSON"}
-resp = requests.get(CWB_API_URL, headers=HEADERS, params=params)
-data = resp.json()
+try:
+    resp = requests.get(CWB_API_URL, headers=HEADERS, params=params, timeout=15)
+    data = resp.json()
+except Exception as e:
+    logger.error(f"❌ 無法連線氣象局 API：{e}")
+    data = {}
 
 count_inserted = 0
 count_skipped = 0

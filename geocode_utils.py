@@ -1,4 +1,3 @@
-# geocode_utils.py
 import requests
 import time
 from logger import logger
@@ -20,8 +19,18 @@ def clean_location_name(name: str) -> str:
         except:
             pass
     return name.strip()
-    
 
+# 自訂補丁：無法被 Nominatim 解析的地名
+manual_fix = {
+    "花蓮縣近海": (23.8, 121.6),
+    "臺灣東部海域": (24.0, 122.2),
+    "臺灣東南部海域": (22.5, 122.0),
+    "花蓮縣秀林鄉": (24.1, 121.6),
+    "屏東縣三地門鄉": (22.8, 120.7),
+    "高雄市那瑪夏區": (23.3, 120.8),
+    "臺東縣海端鄉": (23.0, 121.1),
+    "苗栗縣南庄鄉": (24.6, 121.0),
+}
 
 def get_coordinates_from_text(location_name):
     """
@@ -29,6 +38,15 @@ def get_coordinates_from_text(location_name):
     """
     location_name = clean_location_name(location_name)
     location_name = location_name.replace("台", "臺")
+
+    if not location_name:
+        return None, None
+
+    # 優先查找手動修正表
+    if location_name in manual_fix:
+        lat, lon = manual_fix[location_name]
+        logger.info(f"📍 已從補丁表解析地點：{location_name} → ({lat}, {lon})")
+        return lat, lon
 
     if location_name in _geocode_cache:
         return _geocode_cache[location_name]
