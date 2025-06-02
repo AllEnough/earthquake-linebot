@@ -67,6 +67,6 @@ def index():
         end_date=end_date_str,
         all_epicenters=sorted(all_epicenters),
         summary=summary,
-        line_help=line_help,
+        line_help=line_help
     )
 

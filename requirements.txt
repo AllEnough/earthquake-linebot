@@ -1,10 +1,30 @@
-Flask
-matplotlib
-pymongo
-pandas
-pmdarima==2.0.3
-numpy==1.24.4
-Cython==0.29.36
-certifi
+python-3.11.9
+
+# 🌐 Web & API
+flask
+requests
 python-dotenv
+
+# 🗃️ MongoDB
+pymongo[srv]
+certifi
+
+# 🤖 LINE Messaging API (v3)
+line-bot-sdk>=3.17.1
+
+# 📊 圖表與資料處理
+pandas
+matplotlib
+seaborn
+
+# 📈 AI 模型預測
+pmdarima
+scikit-learn
+
+# 🗺️ 地圖與熱力圖
+basemap
+
+# ⏳ 時區處理（Python 3.11+ 已內建 UTC）
+
+# 🔁 定時任務
 schedule

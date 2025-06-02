@@ -24,12 +24,8 @@ start_date = end_date - timedelta(days=30)
 
 logger.info("🌐 正在抓取中央氣象局地震資料...")
 params = {"format": "JSON"}
-try:
-    resp = requests.get(CWB_API_URL, headers=HEADERS, params=params, timeout=15)
-    data = resp.json()
-except Exception as e:
-    logger.error(f"❌ 無法連線氣象局 API：{e}")
-    data = {}
+resp = requests.get(CWB_API_URL, headers=HEADERS, params=params)
+data = resp.json()
 
 count_inserted = 0
 count_skipped = 0

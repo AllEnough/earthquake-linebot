@@ -32,7 +32,6 @@ def run_daily_forecast_loop():
         generate_daily_count_chart()
         generate_avg_magnitude_chart()
         generate_max_magnitude_chart()
-
         logger.info("✅ 圖表更新完成，等待 24 小時...")
         time.sleep(86400)
 
