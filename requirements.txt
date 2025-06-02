@@ -1,0 +1,23 @@
+# 🌐 Web & API
+flask
+requests
+python-dotenv
+
+# 🗃️ MongoDB
+pymongo[srv]
+certifi
+
+# 🤖 LINE Messaging API (v3)
+line-bot-sdk>=3.17.1
+
+# 📊 圖表與資料處理
+pandas
+matplotlib
+
+# 📈 AI 模型預測
+pmdarima
+
+# ⏳ 時區處理（Python 3.11+ 已內建 UTC）
+
+# 🔁 定時任務
+schedule
