@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, UTC
 import os
 
 from database import get_earthquake_collection
-from font_utils import luse_custom_font_from_file
+from font_utils import use_custom_font_from_file
 from logger import logger
 
 
