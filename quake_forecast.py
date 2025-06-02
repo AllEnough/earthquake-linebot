@@ -47,7 +47,8 @@ def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_p
         return
 
     series = df_grouped["magnitude"]
-
+    series.index = pd.to_datetime(series.index)
+    
     model = auto_arima(series, seasonal=False, suppress_warnings=True)
     forecast = model.predict(n_periods=predict_days)
 
