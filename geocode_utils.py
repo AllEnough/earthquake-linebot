@@ -16,6 +16,7 @@ def clean_location_name(name: str) -> str:
     if name.startswith("位於"):
         return name[2:].strip()
     return name.strip()
+    
 
 
 def get_coordinates_from_text(location_name):
@@ -23,6 +24,7 @@ def get_coordinates_from_text(location_name):
     使用 Nominatim API 將中文地點轉換為 (lat, lon)
     """
     location_name = clean_location_name(location_name)
+    location_name = location_name.replace("台", "臺")
 
     if location_name in _geocode_cache:
         return _geocode_cache[location_name]
@@ -37,21 +39,21 @@ def get_coordinates_from_text(location_name):
     headers = {
         "User-Agent": "earthquake-line-bot/1.0 (your@email.com)"
     }
-
-    try:
-        response = requests.get(url, params=params, headers=headers, timeout=10)
-        data = response.json()
-        if data:
-            lat = float(data[0]["lat"])
-            lon = float(data[0]["lon"])
-            _geocode_cache[location_name] = (lat, lon)
-            logger.info(f"📍 已解析地點：{location_name} → ({lat}, {lon})")
-            time.sleep(1)  # 尊重 API 限速
-            return lat, lon
-        else:
-            logger.warning(f"⚠️ 找不到地點：{location_name}")
-    except Exception as e:
-        logger.error(f"❌ 地理位置查詢失敗：{e}")
+    for attempt in range(3):
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            data = response.json()
+            if data:
+                lat = float(data[0]["lat"])
+                lon = float(data[0]["lon"])
+                _geocode_cache[location_name] = (lat, lon)
+                logger.info(f"📍 已解析地點：{location_name} → ({lat}, {lon})")
+                time.sleep(1)  # 尊重 API 限速
+                return lat, lon
+            else:
+                logger.warning(f"⚠️ 找不到地點：{location_name}")
+        except Exception as e:
+            logger.error(f"❌ 地理位置查詢失敗：{e}")
 
     _geocode_cache[location_name] = (None, None)
     return None, None
