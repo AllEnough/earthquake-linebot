@@ -22,6 +22,7 @@ LINE_CHANNEL_ACCESS_TOKEN = clean_env("LINE_CHANNEL_ACCESS_TOKEN")
 MONGO_URI = clean_env("MONGO_URI")
 CWA_API_KEY = clean_env("CWA_API_KEY")
 DOMAIN = clean_env("DOMAIN")  # ✅ 用於圖表網址等地方
+GOOGLE_MAPS_API_KEY = clean_env("GOOGLE_MAPS_API_KEY")
 
 # ✅ 檢查環境變數是否齊全
 required_vars = [
@@ -29,7 +30,8 @@ required_vars = [
     LINE_CHANNEL_ACCESS_TOKEN,
     MONGO_URI,
     CWA_API_KEY,
-    DOMAIN
+    DOMAIN,
+    GOOGLE_MAPS_API_KEY
 ]
 
 if not all(required_vars):

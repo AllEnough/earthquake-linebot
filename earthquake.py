@@ -1,10 +1,12 @@
 # earthquake.py
 import time
+import os
 from datetime import datetime
 from quake_api import fetch_latest_quake
-from line_push_utils import push_messages_to_all_users
+from line_push_utils import push_messages_to_all_users, push_image_to_all_users
 from config import db
 from logger import logger
+from quake_map import generate_static_map  # ✅ 新增地圖生成功能
 
 # 用於記錄最後推播的時間，避免重複推播
 last_quake_time = None
@@ -48,6 +50,13 @@ def quake_check_loop():
 ➡️ 詳情：{quake['link']}
 """
                 logger.info("▶️ 發現新地震，開始推播...")
+                if quake.get("lat") and quake.get("lon"):
+                    map_path = generate_static_map(quake["lat"], quake["lon"])
+                    if map_path:
+                        img_url = f"{os.getenv('DOMAIN')}/static/map_latest.png"
+                        push_image_to_all_users(img_url, msg)
+                        continue  # ✅ 若已推播圖片則略過文字
+
                 push_messages_to_all_users(msg)
             else:
                 logger.info(f"🔄 尚無新地震，最後地震時間：{last_quake_time}")
