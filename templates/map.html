@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>震央互動地圖</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html, body {
+            height: 100%; margin: 0; padding: 0;
+            font-family: "Segoe UI", "Noto Sans TC", sans-serif;
+        }
+        #map {
+            height: 100%;
+        }
+        .info-box {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 10px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h3>震央互動地圖</h3>
+        <p>顯示最近地震標記，點擊查看資訊。</p>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        async function initMap() {
+            const response = await fetch("/api/earthquakes");
+            const data = await response.json();
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 6,
+                center: { lat: 23.8, lng: 121 },
+            });
+
+            data.forEach(eq => {
+                if (!eq.lat || !eq.lon) return;
+                const marker = new google.maps.Marker({
+                    position: { lat: eq.lat, lng: eq.lon },
+                    map,
+                    title: eq.epicenter
+                });
+
+                const info = new google.maps.InfoWindow({
+                    content: `<b>${eq.epicenter}</b><br>時間：${eq.origin_time}<br>規模：${eq.magnitude}<br>深度：${eq.depth} km`
+                });
+                marker.addListener("click", () => info.open(map, marker));
+            });
+        }
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap">
+    </script>
+</body>
+</html>

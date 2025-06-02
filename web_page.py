@@ -3,6 +3,9 @@ from flask import Blueprint, render_template, request
 from database import get_earthquake_collection
 from datetime import datetime, UTC
 from quake_summary import get_text_summary
+from flask import jsonify
+from bson.json_util import dumps
+from config import GOOGLE_MAPS_API_KEY
 
 web_page = Blueprint('web_page', __name__)
 collection = get_earthquake_collection()
@@ -67,6 +70,18 @@ def index():
         end_date=end_date_str,
         all_epicenters=sorted(all_epicenters),
         summary=summary,
-        line_help=line_help
+        line_help=line_help,
+
     )
 
+from flask import jsonify
+from bson.json_util import dumps
+
+@web_page.route("/map")
+def map_page():
+    return render_template("map.html", google_maps_key=GOOGLE_MAPS_API_KEY)
+
+@web_page.route("/api/earthquakes")
+def api_earthquakes():
+    results = collection.find({"lat": {"$exists": True}, "lon": {"$exists": True}}).sort("origin_time", -1).limit(100)
+    return dumps(results)

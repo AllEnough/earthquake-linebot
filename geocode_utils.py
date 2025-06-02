@@ -1,5 +1,6 @@
 import requests
 import time
+import os
 from logger import logger
 
 # 用於避免重複查詢同一地名
@@ -20,7 +21,7 @@ def clean_location_name(name: str) -> str:
             pass
     return name.strip()
 
-# 自訂補丁：無法被 Nominatim 解析的地名
+# 自訂補丁：無法被 API 解析的地名
 manual_fix = {
     "花蓮縣近海": (23.8, 121.6),
     "臺灣東部海域": (24.0, 122.2),
@@ -34,7 +35,7 @@ manual_fix = {
 
 def get_coordinates_from_text(location_name):
     """
-    使用 Nominatim API 將中文地點轉換為 (lat, lon)
+    使用 Google Geocoding API 將中文地點轉換為 (lat, lon)
     """
     location_name = clean_location_name(location_name)
     location_name = location_name.replace("台", "臺")
@@ -51,31 +52,33 @@ def get_coordinates_from_text(location_name):
     if location_name in _geocode_cache:
         return _geocode_cache[location_name]
 
-    url = "https://nominatim.openstreetmap.org/search"
+    api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+    if not api_key:
+        logger.warning("⚠️ 缺少 GOOGLE_MAPS_API_KEY")
+        return None, None
+
+    url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
-        "q": location_name,
-        "format": "json",
-        "limit": 1,
-        "accept-language": "zh-TW"
+        "address": location_name,
+        "language": "zh-TW",
+        "key": api_key
     }
-    headers = {
-        "User-Agent": "earthquake-line-bot/1.0 (your@email.com)"
-    }
-    for attempt in range(3):
-        try:
-            response = requests.get(url, params=params, headers=headers, timeout=10)
-            data = response.json()
-            if data:
-                lat = float(data[0]["lat"])
-                lon = float(data[0]["lon"])
-                _geocode_cache[location_name] = (lat, lon)
-                logger.info(f"📍 已解析地點：{location_name} → ({lat}, {lon})")
-                time.sleep(1)  # 尊重 API 限速
-                return lat, lon
-            else:
-                logger.warning(f"⚠️ 找不到地點：{location_name}")
-        except Exception as e:
-            logger.error(f"❌ 地理位置查詢失敗：{e}")
+
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        data = response.json()
+        if data.get("status") == "OK" and data.get("results"):
+            result = data["results"][0]
+            location = result["geometry"]["location"]
+            lat = location["lat"]
+            lon = location["lng"]
+            _geocode_cache[location_name] = (lat, lon)
+            logger.info(f"📍 已解析地點（Google）：{location_name} → ({lat}, {lon})")
+            return lat, lon
+        else:
+            logger.warning(f"⚠️ Google Geocoding 無結果：{location_name} - {data.get('status')}")
+    except Exception as e:
+        logger.error(f"❌ Google Geocoding 錯誤：{e}")
 
     _geocode_cache[location_name] = (None, None)
     return None, None
