@@ -8,8 +8,6 @@ from chart_daily import generate_daily_count_chart
 from chart_avg import generate_avg_magnitude_chart
 from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
-from hotspot_map import generate_epicenter_heatmap
-from epicenter_cluster import generate_epicenter_cluster_chart
 from quake_summary import get_text_summary
 from config import db
 
@@ -22,6 +20,7 @@ def handle_query_help():
         "\n🔍 基本查詢（快速）：\n"
         "🔹 輸入「地震 花蓮」➡️ 查詢震央包含『花蓮』的地震\n"
         "🔹 輸入「地震 >5」➡️ 查詢規模大於 5 的地震\n"
+        "🔹 輸入「最新」➡️ 查詢最新的一筆地震資料\n"
         "\n📅 進階查詢（支援條件）：\n"
         "🔹 輸入「查詢 花蓮」➡️ 查詢花蓮所有地震紀錄（近 50 筆）\n"
         "🔹 輸入「查詢 花蓮 2024-05-01 2024-05-31」➡️ 查詢時間區間地震\n"
@@ -30,8 +29,6 @@ def handle_query_help():
         "🔹 「地震平均規模圖」\n"
         "🔹 「地震最大規模圖」\n"
         "🔹 「地震預測圖」➡️ AI 模型預測最大規模\n"
-        "🔹 「地震熱區圖」➡️ 震央熱力分布圖\n"
-        "🔹 「震央群聚圖」➡️ AI 群聚分析圖\n"
         "\n📝 文字報告：\n"
         "🔹 「地震摘要」➡️ 一週地震活動總結\n"
     )
@@ -74,18 +71,6 @@ def handle_chart_max():
 def handle_chart_forecast():
     generate_forecast_chart()
     url = f"{DOMAIN}/static/chart_predict.png"
-    return [ImageMessage(original_content_url=url, preview_image_url=url)]
-
-
-def handle_chart_heatmap():
-    generate_epicenter_heatmap()
-    url = f"{DOMAIN}/static/heatmap.png"
-    return [ImageMessage(original_content_url=url, preview_image_url=url)]
-
-
-def handle_chart_cluster():
-    generate_epicenter_cluster_chart()
-    url = f"{DOMAIN}/static/epicenter_clusters.png"
     return [ImageMessage(original_content_url=url, preview_image_url=url)]
 
 

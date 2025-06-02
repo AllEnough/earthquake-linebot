@@ -12,8 +12,6 @@ from line_handlers import (
     handle_chart_avg,
     handle_chart_max,
     handle_chart_forecast,
-    handle_chart_heatmap,
-    handle_chart_cluster,
     handle_summary_text,
     handle_query_custom,
     handle_query_advanced,
@@ -68,10 +66,6 @@ def handle_webhook():
                     messages = handle_chart_max()
                 elif user_message == "地震預測圖":
                     messages = handle_chart_forecast()
-                elif user_message == "地震熱區圖":
-                    messages = handle_chart_heatmap()
-                elif user_message == "震央群聚圖":
-                    messages = handle_chart_cluster()
                 elif user_message in ["地震摘要", "地震報告"]:
                     messages = handle_summary_text()
                 elif user_message.startswith("查詢"):
