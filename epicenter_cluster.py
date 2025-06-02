@@ -5,14 +5,12 @@ from sklearn.cluster import KMeans
 from datetime import datetime, timedelta, UTC
 import os
 
-from font_utils import use_custom_font_from_file
 from database import get_earthquake_collection
 from logger import logger
 
 
 def generate_epicenter_cluster_chart(days=30, k=4, output_path="static/epicenter_clusters.png"):
     logger.info("🔬 開始進行震央群聚分析...")
-    use_custom_font_from_file()
 
     collection = get_earthquake_collection()
     start_time = datetime.now(UTC) - timedelta(days=days)
