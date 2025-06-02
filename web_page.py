@@ -68,7 +68,5 @@ def index():
         all_epicenters=sorted(all_epicenters),
         summary=summary,
         line_help=line_help,
-        cluster_chart_url="/static/epicenter_clusters.png",
-        heatmap_chart_url="/static/heatmap.png"
     )
 
