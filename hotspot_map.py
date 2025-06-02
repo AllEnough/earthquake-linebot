@@ -53,7 +53,7 @@ def generate_epicenter_heatmap(days=30, output_path="static/heatmap.png"):
     x, y = m(lons, lats)
     sns.kdeplot(x=x, y=y, shade=True, cmap="Reds", bw_adjust=0.5, alpha=0.6, thresh=0.05)
 
-    plt.title("台灣近 30 天地震震央熱區分布")
+    plt.title("	Epicenter Heatmap of Taiwan (Last 30 Days)", fontsize=16)
     os.makedirs("static", exist_ok=True)
     plt.savefig(output_path, dpi=150)
     plt.close()

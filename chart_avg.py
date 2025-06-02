@@ -39,9 +39,9 @@ def generate_avg_magnitude_chart(output_path="static/chart_avg_magnitude.png", d
 
     plt.figure(figsize=(10, 5))
     plt.plot(avg_per_day["date"], avg_per_day["magnitude"], marker='o', color='tomato')
-    plt.title("每日地震平均規模")
-    plt.xlabel("日期")
-    plt.ylabel("平均規模")
+    plt.title("Average Magnitude")
+    plt.xlabel("Data")
+    plt.ylabel("Magnitude")
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.tight_layout()

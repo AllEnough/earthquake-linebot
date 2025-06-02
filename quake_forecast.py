@@ -53,11 +53,11 @@ def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_p
 
     # 畫圖
     plt.figure(figsize=(10, 5))
-    plt.plot(series.index, series.values, label="實際最大規模", marker='o')
-    plt.plot(future_dates, forecast, label="預測最大規模", marker='x', linestyle='--')
-    plt.title("每日最大地震規模預測")
-    plt.xlabel("日期")
-    plt.ylabel("地震規模")
+    plt.plot(series.index, series.values, label="Actual Max Magnitude", marker='o')
+    plt.plot(future_dates, forecast, label="Forecasted Max Magnitude", marker='x', linestyle='--')
+    plt.title("Forecasted Max Magnitude for Coming Days")
+    plt.xlabel("Date")
+    plt.ylabel("Magnitude")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()

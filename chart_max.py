@@ -44,9 +44,9 @@ def generate_max_magnitude_chart(output_path="static/chart_max_magnitude.png", d
         marker='s',
         color='green'
     )
-    plt.title("每日最大地震規模")
-    plt.xlabel("日期")
-    plt.ylabel("最大規模")
+    plt.title("Max Magnitude")
+    plt.xlabel("Date")
+    plt.ylabel("Magnitude")
     plt.xticks(rotation=45)
     plt.grid(True)
     plt.tight_layout()

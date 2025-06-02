@@ -40,11 +40,11 @@ def generate_epicenter_cluster_chart(days=30, k=4, output_path="static/epicenter
 
     # 畫圖
     plt.figure(figsize=(10, 8))
-    scatter = plt.scatter(lons, lats, c=labels, cmap='tab10', s=40, alpha=0.7)
+    plt.scatter(lons, lats, c=labels, cmap='tab10', s=40, alpha=0.7)
     plt.scatter(centers[:,1], centers[:,0], c='red', marker='X', s=200, label='群聚中心')
     plt.xlabel("經度")
     plt.ylabel("緯度")
-    plt.title(f"台灣近 {days} 天震央聚類分析 (KMeans k={k})")
+    plt.title(f"KMeans Clustering of Epicenters (Last {days} Days, k={k})")
     plt.legend()
     plt.grid(True)
 

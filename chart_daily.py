@@ -25,9 +25,9 @@ def generate_daily_count_chart(days=7, output_path="static/chart_daily_count.png
 
     plt.figure(figsize=(10, 4))
     plt.plot(list(date_counts.keys()), list(date_counts.values()), marker='o', linestyle='-', color='blue')
-    plt.title("每日地震次數統計")
-    plt.xlabel("日期")
-    plt.ylabel("地震次數")
+    plt.title("Daily Earthquake Count")
+    plt.xlabel("Date")
+    plt.ylabel("Count")
     plt.grid(True)
     plt.tight_layout()
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
