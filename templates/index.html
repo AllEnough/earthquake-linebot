@@ -69,21 +69,6 @@
 <body>
     <h1>地震資料查詢系統</h1>
 
-    <form method="get" action="/">
-        <label>地區：</label>
-        <select name="keyword">
-            <option value="">全部</option>
-            {% for city in all_epicenters %}
-                <option value="{{ city }}" {% if keyword == city %}selected{% endif %}>{{ city }}</option>
-            {% endfor %}
-        </select>
-        <label>起始日期：</label>
-        <input type="date" name="start_date" value="{{ start_date or '' }}">
-        <label>結束日期：</label>
-        <input type="date" name="end_date" value="{{ end_date or '' }}">
-        <button type="submit">查詢</button>
-    </form>
-
     <h2>🗺️ 最新震央地圖預覽</h2>
     <iframe src="/map?mag=>=4&start={{ (now - timedelta(days=7)).strftime('%Y-%m-%d') }}" class="map-preview" loading="lazy"></iframe>
     <div style="text-align: center; margin-bottom: 30px;">
