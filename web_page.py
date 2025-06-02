@@ -1,9 +1,8 @@
 # web_page.py
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 from database import get_earthquake_collection
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from quake_summary import get_text_summary
-from flask import jsonify
 from bson.json_util import dumps
 from config import GOOGLE_MAPS_API_KEY
 
@@ -17,10 +16,8 @@ def index():
     end_date_str = request.args.get('end_date', '')
     query = {}
 
-    # 地區選單用：抓出所有已知震央文字
     all_epicenters = collection.distinct("epicenter")
 
-    # 條件組合查詢
     if keyword:
         query["epicenter"] = {"$regex": keyword}
     if start_date_str or end_date_str:
@@ -36,13 +33,9 @@ def index():
             except ValueError:
                 pass
 
-    # 查詢地震資料（最多 50 筆）
     quakes = collection.find(query).sort('origin_time', -1).limit(50)
-
-    # 產生 7 日摘要
     summary = get_text_summary(7)
 
-    # LINE Bot 使用說明（可用於首頁或 help.html）
     line_help = """
 🤖 LINE 地震查詢機器人使用說明：
 
@@ -62,6 +55,8 @@ def index():
 🔹 「地震摘要」➡️ 一週地震活動總結
 """
 
+    now = datetime.now(UTC)
+
     return render_template(
         'index.html',
         quakes=quakes,
@@ -71,17 +66,54 @@ def index():
         all_epicenters=sorted(all_epicenters),
         summary=summary,
         line_help=line_help,
-
+        now=now,
+        show_heatmap_button=True  # ✅ 傳給模板啟用熱力圖按鈕
     )
-
-from flask import jsonify
-from bson.json_util import dumps
 
 @web_page.route("/map")
 def map_page():
     return render_template("map.html", google_maps_key=GOOGLE_MAPS_API_KEY)
 
+@web_page.route("/leaflet-map")
+def leaflet_map():
+    return render_template("leaflet_map.html")
+
 @web_page.route("/api/earthquakes")
 def api_earthquakes():
-    results = collection.find({"lat": {"$exists": True}, "lon": {"$exists": True}}).sort("origin_time", -1).limit(100)
+    query = {"lat": {"$exists": True}, "lon": {"$exists": True}}
+
+    mag_filter = request.args.get("mag")
+    place_filter = request.args.get("place")
+    start_date = request.args.get("start")
+    end_date = request.args.get("end")
+
+    if mag_filter:
+        if mag_filter.startswith(">="):
+            query["magnitude"] = {"$gte": float(mag_filter[2:])}
+        elif mag_filter.startswith("<="):
+            query["magnitude"] = {"$lte": float(mag_filter[2:])}
+        elif mag_filter.startswith(">"):
+            query["magnitude"] = {"$gt": float(mag_filter[1:])}
+        elif mag_filter.startswith("<"):
+            query["magnitude"] = {"$lt": float(mag_filter[1:])}
+        elif mag_filter.startswith("="):
+            query["magnitude"] = float(mag_filter[1:])
+
+    if place_filter:
+        query["epicenter"] = {"$regex": place_filter}
+
+    if start_date or end_date:
+        query["origin_time"] = {}
+        if start_date:
+            try:
+                query["origin_time"]["$gte"] = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC)
+            except:
+                pass
+        if end_date:
+            try:
+                query["origin_time"]["$lte"] = datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=UTC)
+            except:
+                pass
+
+    results = collection.find(query).sort("origin_time", -1).limit(200)
     return dumps(results)

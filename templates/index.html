@@ -50,6 +50,15 @@
             border: 1px solid #ccc;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        iframe.map-preview {
+            display: block;
+            margin: 30px auto;
+            width: 100%;
+            max-width: 900px;
+            height: 360px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
         @media (max-width: 600px) {
             table, th, td {
                 font-size: 14px;
@@ -75,17 +84,29 @@
         <button type="submit">查詢</button>
     </form>
 
+    <h2>🗺️ 最新震央地圖預覽</h2>
+    <iframe src="/map?mag=>=4&start={{ (now - timedelta(days=7)).strftime('%Y-%m-%d') }}" class="map-preview" loading="lazy"></iframe>
+    <div style="text-align: center; margin-bottom: 30px;">
+      <a href="/map" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; border-radius: 5px; text-decoration: none; margin-right: 10px;">
+        查看完整互動地圖
+      </a>
+      <a href="/leaflet-map" target="_blank" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none;">
+        切換至熱力圖版
+      </a>
+    </div>
+
+
     <h2>📈 地震規模預測圖（未來 3 天）</h2>
-    <img src="/static/chart_predict.png" alt="地震預測圖" class="chart">
+    <img src="/static/chart_predict.png" alt="地震預測圖" class="chart" loading="lazy">
 
     <h2>📊 每日地震次數統計圖</h2>
-    <img src="/static/chart_daily_count.png" alt="每日地震次數圖" class="chart">
+    <img src="/static/chart_daily_count.png" alt="每日地震次數圖" class="chart" loading="lazy">
 
     <h2>📊 每日地震平均規模圖</h2>
-    <img src="/static/chart_avg_magnitude.png" alt="平均地震規模圖" class="chart">
+    <img src="/static/chart_avg_magnitude.png" alt="平均地震規模圖" class="chart" loading="lazy">
 
     <h2>📊 每日最大規模地震圖</h2>
-    <img src="/static/chart_max_magnitude.png" alt="最大地震規模圖" class="chart">
+    <img src="/static/chart_max_magnitude.png" alt="最大地震規模圖" class="chart" loading="lazy">
 
     <h2>📝 地震摘要報告（近 7 天）</h2>
     <div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
@@ -106,6 +127,7 @@
             <th>震央</th>
             <th>深度 (公里)</th>
             <th>規模</th>
+            <th>地圖</th>
         </tr>
         {% for quake in quakes %}
         <tr>
@@ -113,6 +135,13 @@
             <td>{{ quake.epicenter or '暫無資料' }}</td>
             <td>{{ quake.depth or 'N/A' }}</td>
             <td>{{ quake.magnitude or 'N/A' }}</td>
+            <td>
+                {% if quake.lat and quake.lon %}
+                    <a href="https://maps.google.com/?q={{ quake.lat }},{{ quake.lon }}" target="_blank">地圖</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>

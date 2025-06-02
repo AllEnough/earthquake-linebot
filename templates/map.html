@@ -10,29 +10,85 @@
             font-family: "Segoe UI", "Noto Sans TC", sans-serif;
         }
         #map {
-            height: 100%;
+            height: calc(100% - 200px);
+        }
+        .controls {
+            padding: 10px;
+            background: #f5f5f5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .controls input, .controls select, .controls button {
+            padding: 6px 10px;
+            font-size: 15px;
         }
         .info-box {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: white;
-            padding: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-            z-index: 10;
+            text-align: center;
+            padding: 10px 5px;
+            background: #fff;
         }
     </style>
 </head>
 <body>
     <div class="info-box">
         <h3>震央互動地圖</h3>
-        <p>顯示最近地震標記，點擊查看資訊。</p>
+        <p>輸入查詢條件，顯示最近地震分布圖。</p>
     </div>
+
+    <form class="controls" id="searchForm">
+        <input type="text" name="place" placeholder="地點關鍵字" value="">
+        <select name="mag">
+            <option value="">全部規模</option>
+            <option value=">=5">≥ 5 級</option>
+            <option value=">=4">≥ 4 級</option>
+            <option value=">=3">≥ 3 級</option>
+        </select>
+        <input type="date" name="start">
+        <input type="date" name="end">
+        <button type="submit">查詢</button>
+        <button type="button" id="loadLast">套用上次查詢</button>
+    </form>
+
     <div id="map"></div>
 
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
     <script>
+        const getMarkerIcon = (mag) => {
+            let color = "yellow";
+            let size = 10;
+            if (mag >= 5) {
+                color = "red";
+                size = 24;
+            } else if (mag >= 4) {
+                color = "orange";
+                size = 16;
+            }
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: color,
+                fillOpacity: 0.8,
+                scale: size / 6,
+                strokeColor: "white",
+                strokeWeight: 1,
+            };
+        };
+
+        function getQueryString() {
+            const params = new URLSearchParams(window.location.search);
+            const qs = [];
+            for (const [key, val] of params.entries()) {
+                qs.push(`${key}=${encodeURIComponent(val)}`);
+                const el = document.querySelector(`[name='${key}']`);
+                if (el) el.value = val;
+            }
+            return qs.length ? `?${qs.join('&')}` : '';
+        }
+
         async function initMap() {
-            const response = await fetch("/api/earthquakes");
+            const response = await fetch(`/api/earthquakes${getQueryString()}`);
             const data = await response.json();
 
             const map = new google.maps.Map(document.getElementById("map"), {
@@ -40,20 +96,85 @@
                 center: { lat: 23.8, lng: 121 },
             });
 
-            data.forEach(eq => {
-                if (!eq.lat || !eq.lon) return;
+            let maxQuake = null;
+            const heatMap = new Map();
+            const markers = data.map(eq => {
+                if (!eq.lat || !eq.lon) return null;
+                if (!maxQuake || eq.magnitude > maxQuake.magnitude) maxQuake = eq;
+
+                const key = `${eq.lat.toFixed(2)}_${eq.lon.toFixed(2)}`;
+                heatMap.set(key, (heatMap.get(key) || 0) + 1);
+
                 const marker = new google.maps.Marker({
                     position: { lat: eq.lat, lng: eq.lon },
-                    map,
-                    title: eq.epicenter
+                    title: eq.epicenter,
+                    icon: getMarkerIcon(eq.magnitude)
                 });
 
                 const info = new google.maps.InfoWindow({
-                    content: `<b>${eq.epicenter}</b><br>時間：${eq.origin_time}<br>規模：${eq.magnitude}<br>深度：${eq.depth} km`
+                    content: `
+                        <b>${eq.epicenter}</b><br>
+                        時間：${eq.origin_time}<br>
+                        規模：${eq.magnitude}<br>
+                        深度：${eq.depth} km<br>
+                        <a href='https://maps.google.com/?q=${eq.lat},${eq.lon}' target='_blank'>查看地圖</a>
+                    `
                 });
                 marker.addListener("click", () => info.open(map, marker));
+                return marker;
+            }).filter(Boolean);
+
+            new markerClusterer.MarkerClusterer({ markers, map });
+
+            // 🔴 最大震央紅圈
+            if (maxQuake) {
+                new google.maps.Circle({
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.2,
+                    map,
+                    center: { lat: maxQuake.lat, lng: maxQuake.lon },
+                    radius: maxQuake.magnitude * 15000
+                });
+            }
+
+            // 🔵 熱區圓形圖層
+            heatMap.forEach((count, key) => {
+                const [lat, lon] = key.split("_").map(Number);
+                new google.maps.Circle({
+                    strokeColor: "#3366FF",
+                    strokeOpacity: 0.5,
+                    strokeWeight: 1,
+                    fillColor: "#3399FF",
+                    fillOpacity: 0.1 + Math.min(count * 0.03, 0.4),
+                    map,
+                    center: { lat, lng: lon },
+                    radius: 5000 + count * 2000
+                });
             });
         }
+
+        document.getElementById("searchForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const params = new URLSearchParams();
+            for (const el of form.elements) {
+                if (el.name && el.value) params.append(el.name, el.value);
+            }
+            localStorage.setItem("quakeMapQuery", params.toString());
+            window.location.href = `/map?${params.toString()}`;
+        });
+
+        document.getElementById("loadLast").addEventListener("click", () => {
+            const last = localStorage.getItem("quakeMapQuery");
+            if (last) {
+                window.location.href = `/map?${last}`;
+            } else {
+                alert("尚未有查詢紀錄。");
+            }
+        });
     </script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_key }}&callback=initMap">
