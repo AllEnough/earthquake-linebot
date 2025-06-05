@@ -21,7 +21,6 @@ COPY . .
 
 # 安裝 Python 套件（包含 numpy, pmdarima）
 RUN pip install --upgrade pip && \
-    pip install numpy==1.24.4 Cython==0.29.36 && \
     pip install -r requirements.txt
 
 # 開啟服務用的 port（Railway 預設使用 PORT 環境變數）

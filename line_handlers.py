@@ -4,12 +4,13 @@ from datetime import datetime, UTC
 import re
 from os import getenv
 
+from config import db, DOMAIN
+
 from chart_daily import generate_daily_count_chart
 from chart_avg import generate_avg_magnitude_chart
 from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
-from config import db
 
 DOMAIN = getenv("DOMAIN", "https://your-domain")
 
