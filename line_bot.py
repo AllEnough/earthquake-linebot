@@ -15,6 +15,7 @@ from line_handlers import (
     handle_summary_text,
     handle_query_custom,
     handle_query_advanced,
+    handle_location_settings,
     handle_push_settings,
     handle_unknown
 )
@@ -52,6 +53,8 @@ def handle_webhook():
                             'joined_at': datetime.now(UTC),
                             'magnitude_threshold': None,
                             'location_filter': None,
+                            'home_lat': None,
+                            'home_lon': None,
                         }
                     },
                     upsert=True
@@ -76,6 +79,8 @@ def handle_webhook():
                     messages = handle_chart_forecast()
                 elif user_message in ["地震摘要", "地震報告"]:
                     messages = handle_summary_text()
+                elif user_message.startswith("所在區域"):
+                    messages = handle_location_settings(user_id, user_message)
                 elif user_message.startswith("推播條件"):
                     messages = handle_push_settings(user_id, user_message)
                 elif user_message.startswith("查詢"):

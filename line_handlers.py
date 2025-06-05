@@ -11,6 +11,8 @@ from chart_avg import generate_avg_magnitude_chart
 from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
+from geocode_utils import get_coordinates_from_text
+
 
 DOMAIN = getenv("DOMAIN", "https://your-domain")
 
@@ -34,6 +36,7 @@ def handle_query_help():
         "🔹 「地震摘要」➡️ 一週地震活動總結\n"
         "\n⚙️ 推播設定：\n"
         "🔹 「推播條件 [震度] [地區]」➡️ 自訂地震推播條件\n"
+        "🔹 「所在區域 [地點]」➡️ 設定個人位置以篩選推播\n"
     )
     return [TextMessage(text=text)]
 
@@ -80,6 +83,33 @@ def handle_chart_forecast():
 def handle_summary_text():
     summary = get_text_summary(days=7)
     return [TextMessage(text=summary)]
+
+
+def handle_summary_text():
+    summary = get_text_summary(days=7)
+    return [TextMessage(text=summary)]
+
+
+def handle_location_settings(user_id, user_message):
+    parts = user_message.strip().split(maxsplit=1)
+    if len(parts) == 1:
+        user = db["users"].find_one({"user_id": user_id})
+        if not user or user.get("home_lat") is None or user.get("home_lon") is None:
+            return [TextMessage(text="⚠️ 尚未設定所在區域。使用：所在區域 [地點]")]
+        lat = user.get("home_lat")
+        lon = user.get("home_lon")
+        return [TextMessage(text=f"📌 目前所在區域：{lat}, {lon}")]
+
+    if parts[1] in ["取消", "重置"]:
+        db["users"].update_one({"user_id": user_id}, {"$set": {"home_lat": None, "home_lon": None}})
+        return [TextMessage(text="✅ 已取消所在區域設定")]
+
+    location = parts[1].strip()
+    lat, lon = get_coordinates_from_text(location)
+    if lat is None or lon is None:
+        return [TextMessage(text="⚠️ 無法解析地點，請嘗試更精確的地址")]
+    db["users"].update_one({"user_id": user_id}, {"$set": {"home_lat": lat, "home_lon": lon}})
+    return [TextMessage(text="✅ 已更新所在區域")]
 
 
 def handle_push_settings(user_id, user_message):

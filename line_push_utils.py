@@ -1,8 +1,25 @@
 # line_push_utils.py
 from linebot.v3.messaging import MessagingApi, ApiClient
-from linebot.v3.messaging.models import TextMessage, PushMessageRequest, ImageMessage
+from linebot.v3.messaging.models import (
+    TextMessage,
+    PushMessageRequest,
+    ImageMessage,
+)
 from config import configuration, collection
 from logger import logger
+import math
+
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    """Calculate distance between two lat/lon points in kilometers."""
+    r = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    d_phi = math.radians(lat2 - lat1)
+    d_lambda = math.radians(lon2 - lon1)
+    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * c
 
 
 def should_push_to_user(user, quake):
@@ -24,13 +41,38 @@ def should_push_to_user(user, quake):
         if loc_kw not in epicenter:
             return False
 
-    return True
+    home_lat = user.get("home_lat")
+    home_lon = user.get("home_lon")
+    if (
+        home_lat is not None
+        and home_lon is not None
+        and quake.get("lat") is not None
+        and quake.get("lon") is not None
+    ):
+        try:
+            dist = haversine_km(float(home_lat), float(home_lon), float(quake["lat"]), float(quake["lon"]))
+            if dist > 150:
+                return False
+        except Exception:
+            pass
 
+    return True
 
 
 def push_messages_to_all_users(message_text, quake=None):
     try:
-        users = list(collection.find({}, {"user_id": 1, "magnitude_threshold": 1, "location_filter": 1}))
+        users = list(
+            collection.find(
+                {},
+                {
+                    "user_id": 1,
+                    "magnitude_threshold": 1,
+                    "location_filter": 1,
+                    "home_lat": 1,
+                    "home_lon": 1,
+                },
+            )
+        )
 
         with ApiClient(configuration) as api_client:
             messaging_api = MessagingApi(api_client)
@@ -52,7 +94,18 @@ def push_messages_to_all_users(message_text, quake=None):
 
 def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
     try:
-        users = list(collection.find({}, {"user_id": 1, "magnitude_threshold": 1, "location_filter": 1}))
+        users = list(
+            collection.find(
+                {},
+                {
+                    "user_id": 1,
+                    "magnitude_threshold": 1,
+                    "location_filter": 1,
+                    "home_lat": 1,
+                    "home_lon": 1,
+                },
+            )
+        )
 
         with ApiClient(configuration) as api_client:
             messaging_api = MessagingApi(api_client)
