@@ -1,5 +1,5 @@
 # chart_avg.py
-from datetime import datetime, UTC
+from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
