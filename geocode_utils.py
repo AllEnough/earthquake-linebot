@@ -2,6 +2,13 @@ import requests
 import os
 from logger import logger
 
+try:
+    from database import get_location_collection
+    location_collection = get_location_collection()
+except Exception as e:
+    location_collection = None
+    logger.warning(f"⚠️ 無法初始化 MongoDB collection：{e}")
+
 # 用於避免重複查詢同一地名
 _geocode_cache = {}
 
@@ -51,10 +58,31 @@ def get_coordinates_from_text(location_name):
     if location_name in manual_fix:
         lat, lon = manual_fix[location_name]
         logger.info(f"📍 已從補丁表解析地點：{location_name} → ({lat}, {lon})")
+        if location_collection:
+            try:
+                location_collection.update_one(
+                    {"name": location_name},
+                    {"$set": {"lat": lat, "lon": lon}},
+                    upsert=True,
+                )
+            except Exception as e:
+                logger.error(f"⚠️ 寫入座標資料庫失敗：{e}")
         return lat, lon
 
-    if location_name in _geocode_cache:
-        return _geocode_cache[location_name]
+     # Check MongoDB cache
+    if location_collection:
+        try:
+            doc = location_collection.find_one({"name": location_name})
+            if doc and doc.get("lat") is not None and doc.get("lon") is not None:
+                lat = doc["lat"]
+                lon = doc["lon"]
+                _geocode_cache[location_name] = (lat, lon)
+                logger.info(
+                    f"📍 已從資料庫取得地點：{location_name} → ({lat}, {lon})"
+                )
+                return lat, lon
+        except Exception as e:
+            logger.error(f"⚠️ 讀取座標資料庫失敗：{e}")
 
     api_key = os.getenv("GOOGLE_MAPS_API_KEY")
     if not api_key:
@@ -77,6 +105,15 @@ def get_coordinates_from_text(location_name):
             lat = location["lat"]
             lon = location["lng"]
             _geocode_cache[location_name] = (lat, lon)
+            if location_collection:
+                try:
+                    location_collection.update_one(
+                        {"name": location_name},
+                        {"$set": {"lat": lat, "lon": lon}},
+                        upsert=True,
+                    )
+                except Exception as e:
+                    logger.error(f"⚠️ 寫入座標資料庫失敗：{e}")
             logger.info(f"📍 已解析地點（Google）：{location_name} → ({lat}, {lon})")
             return lat, lon
         else:

@@ -14,3 +14,7 @@ def get_user_collection():
 # ✅ 地震資料集合
 def get_earthquake_collection():
     return db["earthquakes"]
+
+# ✅ 位置座標集合
+def get_location_collection():
+    return db["locations"]

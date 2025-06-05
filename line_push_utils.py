@@ -18,7 +18,7 @@ def push_messages_to_all_users(message_text):
                     to=user_id,
                     messages=[TextMessage(text=message_text)]
                 )
-                # messaging_api.push_message(push_message)
+                messaging_api.push_message(push_message)
                 logger.info(f"✅ 已推播訊息給 user_id: {user_id}")
 
     except Exception as e:
