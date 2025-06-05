@@ -32,6 +32,8 @@ def handle_query_help():
         "🔹 「地震預測圖」➡️ AI 模型預測最大規模\n"
         "\n📝 文字報告：\n"
         "🔹 「地震摘要」➡️ 一週地震活動總結\n"
+        "\n⚙️ 推播設定：\n"
+        "🔹 「推播條件 [震度] [地區]」➡️ 自訂地震推播條件\n"
     )
     return [TextMessage(text=text)]
 
@@ -78,6 +80,52 @@ def handle_chart_forecast():
 def handle_summary_text():
     summary = get_text_summary(days=7)
     return [TextMessage(text=summary)]
+
+
+def handle_push_settings(user_id, user_message):
+    parts = user_message.strip().split()
+
+    if len(parts) == 1:
+        user = db["users"].find_one({"user_id": user_id})
+        if not user:
+            return [TextMessage(text="⚠️ 無法取得使用者資料。")]
+        mag = user.get("magnitude_threshold")
+        loc = user.get("location_filter")
+        text = "📌 目前推播條件：\n"
+        if mag is not None:
+            text += f"震度門檻：{mag}\n"
+        if loc:
+            text += f"地區關鍵字：{loc}\n"
+        if mag is None and not loc:
+            text += "無（接收所有地震通知）"
+        return [TextMessage(text=text)]
+
+    if len(parts) >= 2 and parts[1] in ["取消", "重置"]:
+        db["users"].update_one(
+            {"user_id": user_id},
+            {"$set": {"magnitude_threshold": None, "location_filter": None}},
+        )
+        return [TextMessage(text="✅ 已取消推播條件，將接收所有地震通知。")]
+
+    mag = None
+    location = None
+    for p in parts[1:]:
+        try:
+            mag = float(p)
+        except ValueError:
+            location = p
+
+    update = {}
+    if mag is not None:
+        update["magnitude_threshold"] = mag
+    if location is not None:
+        update["location_filter"] = location
+
+    if update:
+        db["users"].update_one({"user_id": user_id}, {"$set": update})
+        return [TextMessage(text="✅ 推播條件已更新")]
+
+    return [TextMessage(text="⚠️ 格式錯誤，請使用：推播條件 [震度] [地區]")]
 
 
 def handle_query_custom(user_message):

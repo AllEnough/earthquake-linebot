@@ -15,6 +15,7 @@ from line_handlers import (
     handle_summary_text,
     handle_query_custom,
     handle_query_advanced,
+    handle_push_settings,
     handle_unknown
 )
 
@@ -45,7 +46,14 @@ def handle_webhook():
                 # ✅ 使用者註冊或更新
                 result = collection.update_one(
                     {'user_id': user_id},
-                    {'$setOnInsert': {'user_id': user_id, 'joined_at': datetime.now(UTC)}},
+                    {
+                        '$setOnInsert': {
+                            'user_id': user_id,
+                            'joined_at': datetime.now(UTC),
+                            'magnitude_threshold': None,
+                            'location_filter': None,
+                        }
+                    },
                     upsert=True
                 )
                 if result.upserted_id:
@@ -68,6 +76,8 @@ def handle_webhook():
                     messages = handle_chart_forecast()
                 elif user_message in ["地震摘要", "地震報告"]:
                     messages = handle_summary_text()
+                elif user_message.startswith("推播條件"):
+                    messages = handle_push_settings(user_id, user_message)
                 elif user_message.startswith("查詢"):
                     messages = handle_query_advanced(user_message)
                 elif user_message.startswith("地震"):

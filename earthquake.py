@@ -65,10 +65,10 @@ def quake_check_loop():
                     map_path = generate_static_map(quake["lat"], quake["lon"])
                     if map_path:
                         img_url = f"{DOMAIN}/static/map_latest.png"
-                        push_image_to_all_users(img_url, msg)
+                        push_image_to_all_users(img_url, msg, quake=quake)
                         continue  # ✅ 若已推播圖片則略過文字
 
-                push_messages_to_all_users(msg)
+                push_messages_to_all_users(msg, quake=quake)
             else:
                 logger.info(f"🔄 尚無新地震，最後地震時間：{last_quake_time}")
 
