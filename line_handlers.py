@@ -14,9 +14,6 @@ from quake_summary import get_text_summary
 from geocode_utils import get_coordinates_from_text
 
 
-DOMAIN = getenv("DOMAIN", "https://your-domain")
-
-
 def handle_query_help():
     text = (
         "🤖 地震查詢機器人使用說明：\n"
@@ -78,11 +75,6 @@ def handle_chart_forecast():
     generate_forecast_chart()
     url = f"{DOMAIN}/static/chart_predict.png"
     return [ImageMessage(original_content_url=url, preview_image_url=url)]
-
-
-def handle_summary_text():
-    summary = get_text_summary(days=7)
-    return [TextMessage(text=summary)]
 
 
 def handle_summary_text():
