@@ -6,18 +6,25 @@ from logger import logger
 _geocode_cache = {}
 
 def clean_location_name(name: str) -> str:
+    """Normalize an epicenter string for geocoding."""
     name = name.strip()
-    if name.startswith("位於"):
-        name = name[2:]
-    if any(keyword in name for keyword in ["海域", "近海", "公里", "公尺", "方", "附近"]):
-        return ""
+
+    # Extract formal location inside parentheses first
     if "(" in name and ")" in name:
         try:
             inside = name.split("(", 1)[-1].split(")", 1)[0].strip()
-            if inside.startswith("位於"):
-                name = inside[2:]
-        except:
+            if inside:
+                name = inside
+        except Exception:
             pass
+
+    if name.startswith("位於"):
+        name = name[2:]
+
+    # Keep keywords such as "海域" to allow manual_fix matching
+    if any(keyword in name for keyword in ["海域", "近海", "公里", "公尺", "方", "附近"]):
+        return name
+
     return name.strip()
 
 manual_fix = {
