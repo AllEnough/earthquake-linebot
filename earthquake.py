@@ -11,8 +11,20 @@ from quake_map import generate_static_map  # ✅ 新增地圖生成功能
 # 用於記錄最後推播的時間，避免重複推播
 last_quake_time = None
 
+def initialize_last_quake_time():
+    """Initialize last_quake_time from database to avoid push on startup."""
+    global last_quake_time
+    try:
+        latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
+        if latest and latest.get("origin_time"):
+            last_quake_time = latest["origin_time"]
+            logger.info(f"🌀 初始化 last_quake_time：{last_quake_time}")
+    except Exception as e:
+        logger.error(f"⚠️ 初始化 last_quake_time 失敗：{e}")
+
 def quake_check_loop():
     global last_quake_time
+    initialize_last_quake_time()
 
     while True:
         try:

@@ -31,8 +31,8 @@ count_inserted = 0
 count_skipped = 0
 count_failed = 0
 
-if "records" in data and "earthquakes" in data["records"]:
-    for eq in data["records"]["earthquakes"]:
+if "records" in data and "Earthquakes" in data["records"]:
+    for eq in data["records"]["Earthquakes"]:
         quake = parse_quake_record(eq)
         if not quake:
             count_failed += 1

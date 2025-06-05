@@ -40,7 +40,7 @@ def generate_avg_magnitude_chart(output_path="static/chart_avg_magnitude.png", d
     plt.figure(figsize=(10, 5))
     plt.plot(avg_per_day["date"], avg_per_day["magnitude"], marker='o', color='tomato')
     plt.title("Average Magnitude")
-    plt.xlabel("Data")
+    plt.xlabel("Date")
     plt.ylabel("Magnitude")
     plt.xticks(rotation=45)
     plt.grid(True)

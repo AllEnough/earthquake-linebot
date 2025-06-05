@@ -18,7 +18,7 @@ def parse_quake_record(eq):
             'link': eq['Web']
         }
 
-        # 嘗試補經緯度（使用 Nominatim API）
+        # 嘗試補經緯度（使用 Google Maps API）
         lat, lon = get_coordinates_from_text(epicenter)
         if lat and lon:
             quake['lat'] = lat
