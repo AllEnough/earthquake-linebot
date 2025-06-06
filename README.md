@@ -28,6 +28,14 @@
    ```bash
    python main.py
    ```
+   
+## 清理重複地震資料
+
+若因任何原因產生了重複的地震紀錄，可以執行`remove_duplicates.py`刪除
+同一`origin_time`的多餘資料：
+```bash
+python remove_duplicates.py
+```
 
 亦可使用 `Dockerfile` 建立容器執行。
 
