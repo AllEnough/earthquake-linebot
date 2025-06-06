@@ -13,6 +13,10 @@ from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
 from geocode_utils import get_coordinates_from_text
 
+def normalize_tai(text: str) -> str:
+    """Replace common simplified forms like '台' with '臺'."""
+    return text.replace("台", "臺")
+
 
 def handle_query_help():
     text = (
@@ -20,6 +24,7 @@ def handle_query_help():
         "\n🔍 基本查詢（快速）：\n"
         "🔹 輸入「地震 花蓮」➡️ 查詢震央包含『花蓮』的地震\n"
         "🔹 輸入「地震 >5」➡️ 查詢規模大於 5 的地震\n"
+        "🔹 輸入「地震 花蓮 >5」➡️ 同時篩選地點與規模\n"
         "🔹 輸入「最新」➡️ 查詢最新的一筆地震資料\n"
         "\n📅 進階查詢（支援條件）：\n"
         "🔹 輸入「查詢 花蓮」➡️ 查詢花蓮所有地震紀錄（近 50 筆）\n"
@@ -135,7 +140,7 @@ def handle_push_settings(user_id, user_message):
         try:
             mag = float(p)
         except ValueError:
-            location = p
+            location = normalize_tai(p)
 
     update = {}
     if mag is not None:
@@ -151,11 +156,33 @@ def handle_push_settings(user_id, user_message):
 
 
 def handle_query_custom(user_message):
-    pattern_mag = re.match(r"地震\s*([><=])\s*(\d+(\.\d+)?)", user_message)
-    pattern_epicenter = re.match(r"地震\s+(.+)", user_message)
+    # 支援三種格式：
+    # 1. 地震 >5
+    # 2. 地震 宜蘭
+    # 3. 地震 宜蘭 >5
+
+    # 地震 宜蘭 >5
+    pattern_loc_mag = re.match(
+        r"地震\s+([^><=]+?)\s*([><=])\s*(\d+(?:\.\d+)?)$", user_message
+    )
+    # 地震 >5
+    pattern_mag = re.match(r"地震\s*([><=])\s*(\d+(?:\.\d+)?)$", user_message)
+    # 地震 宜蘭
+    pattern_epicenter = re.match(r"地震\s+(.+)$", user_message)
 
     query = {}
-    if pattern_mag:
+    if pattern_loc_mag:
+        location = pattern_loc_mag.group(1).strip()
+        op = pattern_loc_mag.group(2)
+        value = float(pattern_loc_mag.group(3))
+        query["epicenter"] = {"$regex": location}
+        if op == ">":
+            query["magnitude"] = {"$gt": value}
+        elif op == "<":
+            query["magnitude"] = {"$lt": value}
+        elif op == "=":
+            query["magnitude"] = value
+    elif pattern_mag:
         op, value = pattern_mag.group(1), float(pattern_mag.group(2))
         if op == ">":
             query["magnitude"] = {"$gt": value}
@@ -164,7 +191,7 @@ def handle_query_custom(user_message):
         elif op == "=":
             query["magnitude"] = value
     elif pattern_epicenter:
-        keyword = pattern_epicenter.group(1)
+        keyword = pattern_epicenter.group(1).strip()
         query["epicenter"] = {"$regex": keyword}
 
     results = list(db["earthquakes"].find(query).sort("origin_time", -1).limit(5))
@@ -192,7 +219,7 @@ def handle_query_advanced(user_message):
         location = parts[1]
         query = {"epicenter": {"$regex": location}}
     elif len(parts) == 4:
-        location = parts[1]
+        location = normalize_tai(parts[1])
         start_date = parts[2]
         end_date = parts[3]
         try:
