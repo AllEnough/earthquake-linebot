@@ -1,18 +1,22 @@
 # quake_forecast.py
-import pandas as pd
-import matplotlib.pyplot as plt
-from datetime import datetime, UTC
+"""Generate earthquake magnitude forecasts and chart them."""
+
 import os
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from pmdarima import auto_arima
+from statsmodels.tools.sm_exceptions import ValueWarning
 
 from database import get_earthquake_collection
 from logger import logger
 
-from statsmodels.tools.sm_exceptions import ValueWarning
 import warnings
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=ValueWarning)
 
-from pmdarima import auto_arima
 
 def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_predict.png"):
     logger.info("🤖 開始訓練 ARIMA 模型進行地震規模預測...")
@@ -31,7 +35,7 @@ def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_p
             magnitude = float(doc["magnitude"])
             if isinstance(origin_time, datetime):
                 data.append({"date": origin_time, "magnitude": magnitude})
-        except:
+        except Exception:
             continue
 
     if not data:
@@ -47,7 +51,6 @@ def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_p
         return
 
     series = df_grouped["magnitude"]
-    series.index = pd.to_datetime(series.index)
     series.index = pd.DatetimeIndex(pd.to_datetime(series.index))
 
     model = auto_arima(series, seasonal=False, suppress_warnings=True)
