@@ -9,7 +9,7 @@ from logger import logger
 
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
-
+warnings.filterwarnings("ignore", category=ValueError)
 
 from pmdarima import auto_arima
 
@@ -47,6 +47,7 @@ def generate_forecast_chart(days=30, predict_days=3, output_path="static/chart_p
 
     series = df_grouped["magnitude"]
     series.index = pd.to_datetime(series.index)
+    series.index = pd.DatetimeIndex(pd.to_datetime(series.index))
 
     model = auto_arima(series, seasonal=False, suppress_warnings=True)
     forecast = model.predict(n_periods=predict_days)
