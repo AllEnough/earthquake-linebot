@@ -9,6 +9,7 @@ from quake_import import fetch_and_store_earthquake_data
 from line_push_utils import push_messages_to_all_users, push_image_to_all_users
 from quake_map import generate_static_map
 from config import db, DOMAIN
+from logger import logger
 from web_page import web_page
 
 import threading
