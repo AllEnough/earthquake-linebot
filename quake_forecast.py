@@ -7,9 +7,10 @@ import os
 from database import get_earthquake_collection
 from logger import logger
 
+from statsmodels.tools.sm_exceptions import ValueWarning
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=ValueError)
+warnings.filterwarnings("ignore", category=ValueWarning)
 
 from pmdarima import auto_arima
 
