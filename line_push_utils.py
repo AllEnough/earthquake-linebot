@@ -5,6 +5,7 @@ from linebot.v3.messaging.models import (
     PushMessageRequest,
     ImageMessage,
 )
+from linebot.v3.messaging.exceptions import ApiException
 from config import configuration, collection
 from logger import logger
 import math
@@ -90,8 +91,12 @@ def push_messages_to_all_users(message_text, quake=None):
                 messaging_api.push_message(push_message)
                 logger.info(f"✅ 已推播訊息給 user_id: {user['user_id']}")
 
+    except ApiException as e:
+        logger.error(
+            f"❌ 推播訊息發生錯誤：{e.status} {e.reason}\nHTTP response headers: {e.headers}\nHTTP response body: {e.body}"
+        )
     except Exception as e:
-        logger.error(f"❌ 推播訊息發生錯誤：{e}")
+        logger.error(f"❌ 推播訊息發生未知錯誤：{e}")
 
 
 def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
@@ -126,5 +131,9 @@ def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
                     ]
                 ))
                 logger.info(f"✅ 已推播圖片給 user_id: {user['user_id']}")
+    except ApiException as e:
+        logger.error(
+            f"❌ 推播圖片發生錯誤：{e.status} {e.reason}\nHTTP response headers: {e.headers}\nHTTP response body: {e.body}"
+        )
     except Exception as e:
-        logger.error(f"❌ 推播圖片發生錯誤：{e}")
+        logger.error(f"❌ 推播圖片發生未知錯誤：{e}")
