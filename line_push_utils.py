@@ -73,6 +73,8 @@ def push_messages_to_all_users(message_text, quake=None):
                 },
             )
         )
+        if not users:
+            logger.warning("⚠️ 無使用者可推播")
 
         with ApiClient(configuration) as api_client:
             messaging_api = MessagingApi(api_client)
@@ -106,6 +108,8 @@ def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
                 },
             )
         )
+        if not users:
+            logger.warning("⚠️ 無使用者可推播")
 
         with ApiClient(configuration) as api_client:
             messaging_api = MessagingApi(api_client)

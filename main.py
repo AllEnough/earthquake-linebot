@@ -46,29 +46,32 @@ def test():
 # ✅ 測試：強制推播最新地震或純文字
 @app.route("/test_push", methods=["GET"])
 def test_push():
+    """Manually push the latest quake info or a test message."""
     try:
         latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
-        if latest:
-            msg = (
-                f"📢 測試地震推播！\n"
-                f"時間：{latest.get('origin_time')}\n"
-                f"地點：{latest.get('epicenter')}\n"
-                f"深度：{latest.get('depth')} 公里\n"
-                f"規模：芮氏 {latest.get('magnitude')}"
-            )
-
-            if latest.get("lat") and latest.get("lon"):
-                map_path = generate_static_map(latest["lat"], latest["lon"])
-                if map_path:
-                    img_url = f"{DOMAIN}/static/map_latest.png"
-                    push_image_to_all_users(img_url, msg, quake=latest)
-                    return "✅ 已推播地圖圖片"
-
-            push_messages_to_all_users(msg, quake=latest)
-        else:
+        if not latest:
             push_messages_to_all_users("📢 這是測試推播訊息")
+            return "✅ 已推播測試訊息"
+
+        msg = (
+            f"📢 測試地震推播！\n"
+            f"時間：{latest.get('origin_time')}\n"
+            f"地點：{latest.get('epicenter')}\n"
+            f"深度：{latest.get('depth')} 公里\n"
+            f"規模：芮氏 {latest.get('magnitude')}"
+        )
+
+        # Always push text first
+        push_messages_to_all_users(msg, quake=latest)
+
+        if latest.get("lat") and latest.get("lon"):
+            map_path = generate_static_map(latest["lat"], latest["lon"])
+            if map_path:
+                img_url = f"{DOMAIN.rstrip('/')}/static/map_latest.png"
+                push_image_to_all_users(img_url, msg, quake=latest)
         return "✅ 已推播測試訊息"
     except Exception as e:
+        logger.error(f"❌ 推播失敗：{e}")
         return f"❌ 推播失敗：{e}", 500
 
 # ✅ 啟動背景服務
