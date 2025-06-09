@@ -6,6 +6,9 @@ from quake_import_loop import start_background_quake_import
 from earthquake import quake_check_loop
 from line_bot import handle_webhook
 from quake_import import fetch_and_store_earthquake_data
+from line_push_utils import push_messages_to_all_users, push_image_to_all_users
+from quake_map import generate_static_map
+from config import db, DOMAIN
 from web_page import web_page
 
 import threading
@@ -39,6 +42,34 @@ def index():
 def test():
     fetch_and_store_earthquake_data()
     return "✅ 手動執行地震資料抓取完成"
+
+# ✅ 測試：強制推播最新地震或純文字
+@app.route("/test_push", methods=["GET"])
+def test_push():
+    try:
+        latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
+        if latest:
+            msg = (
+                f"📢 測試地震推播！\n"
+                f"時間：{latest.get('origin_time')}\n"
+                f"地點：{latest.get('epicenter')}\n"
+                f"深度：{latest.get('depth')} 公里\n"
+                f"規模：芮氏 {latest.get('magnitude')}"
+            )
+
+            if latest.get("lat") and latest.get("lon"):
+                map_path = generate_static_map(latest["lat"], latest["lon"])
+                if map_path:
+                    img_url = f"{DOMAIN}/static/map_latest.png"
+                    push_image_to_all_users(img_url, msg, quake=latest)
+                    return "✅ 已推播地圖圖片"
+
+            push_messages_to_all_users(msg, quake=latest)
+        else:
+            push_messages_to_all_users("📢 這是測試推播訊息")
+        return "✅ 已推播測試訊息"
+    except Exception as e:
+        return f"❌ 推播失敗：{e}", 500
 
 # ✅ 啟動背景服務
 if __name__ == "__main__":
