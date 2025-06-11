@@ -14,7 +14,6 @@ from line_handlers import (
     handle_chart_forecast,
     handle_summary_text,
     handle_query_custom,
-    handle_query_advanced,
     handle_unknown
 )
 
@@ -73,8 +72,6 @@ def handle_webhook():
                     messages = handle_chart_forecast()
                 elif user_message in ["地震摘要", "地震報告"]:
                     messages = handle_summary_text()
-                elif user_message.startswith("查詢"):
-                    messages = handle_query_advanced(user_message)
                 elif user_message.startswith("地震"):
                     messages = handle_query_custom(user_message)
                 else:
