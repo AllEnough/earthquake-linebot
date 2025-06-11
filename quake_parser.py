@@ -3,6 +3,8 @@ from datetime import datetime, UTC
 from logger import logger
 from geocode_utils import get_coordinates_from_text
 
+# 用於避免重複顯示取得經緯度的訊息
+_logged_epicenters = set()
 
 def parse_quake_record(eq):
     try:
@@ -35,9 +37,11 @@ def parse_quake_record(eq):
             try:
                 quake['lat'] = float(lat)
                 quake['lon'] = float(lon)
-                logger.info(
-                    f"📍 已從氣象局資料取得經緯度：{epicenter} → ({quake['lat']}, {quake['lon']})"
-                )
+                if epicenter not in _logged_epicenters:
+                    logger.info(
+                        f"📍 已從氣象局資料取得經緯度：{epicenter} → ({quake['lat']}, {quake['lon']})"
+                    )
+                    _logged_epicenters.add(epicenter)
             except Exception:
                 lat = lon = None
 
