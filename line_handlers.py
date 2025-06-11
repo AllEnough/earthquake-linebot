@@ -12,10 +12,8 @@ from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
 from quake_map import generate_static_map
-
-def normalize_tai(text: str) -> str:
-    """Replace common simplified forms like '台' with '臺'."""
-    return text.replace("台", "臺")
+from quake_map import generate_static_map
+from text_utils import normalize_tai
 
 
 def handle_query_help():

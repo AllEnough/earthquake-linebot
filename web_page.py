@@ -5,6 +5,7 @@ from datetime import datetime, UTC, timedelta
 from quake_summary import get_text_summary
 from bson.json_util import dumps
 from config import GOOGLE_MAPS_API_KEY
+from text_utils import normalize_tai
 
 web_page = Blueprint('web_page', __name__)
 collection = get_earthquake_collection()
@@ -99,6 +100,7 @@ def api_earthquakes():
             query["magnitude"] = float(mag_filter[1:])
 
     if place_filter:
+        place_filter = normalize_tai(place_filter)
         query["epicenter"] = {"$regex": place_filter}
 
     if start_date or end_date:
