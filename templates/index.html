@@ -69,6 +69,11 @@
 <body>
     <h1>地震資料查詢系統</h1>
 
+    <h2>📝 地震摘要報告（近 7 天）</h2>
+    <div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
+        {{ summary }}
+    </div>
+
     <h2>🗺️ 最新震央地圖預覽</h2>
     <iframe src="/map?mag=>=4&start={{ (now - timedelta(days=7)).strftime('%Y-%m-%d') }}" class="map-preview" loading="lazy"></iframe>
     <div style="text-align: center; margin-bottom: 30px;">
@@ -92,11 +97,6 @@
 
     <h2>📊 每日最大規模地震圖</h2>
     <img src="/static/chart_max_magnitude.png" alt="最大地震規模圖" class="chart" loading="lazy">
-
-    <h2>📝 地震摘要報告（近 7 天）</h2>
-    <div style="max-width: 800px; margin: 20px auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 6px rgba(0,0,0,0.1); line-height: 1.6;">
-        {{ summary }}
-    </div>
 
 
     <table>
