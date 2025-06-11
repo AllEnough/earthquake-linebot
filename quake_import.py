@@ -6,21 +6,23 @@ from quake_parser import parse_quake_record
 from logger import logger
 
 # ✅ API 來源網址
-url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0016-001?Authorization={CWA_API_KEY}'
+URL_MINOR = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0016-001?Authorization={CWA_API_KEY}'
+URL_MAJOR = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization={CWA_API_KEY}'
 
 # ✅ 地震資料集合
 collection = get_earthquake_collection()
 
 def fetch_and_store_earthquake_data():
     logger.info("🌐 嘗試連線中央氣象局 API 抓取所有地震資料...")
-    try:
-        response = requests.get(url)
-        data = response.json()
-        records = data['records']['Earthquake']
-        logger.info(f"✅ 成功抓取 {len(records)} 筆地震資料")
-    except Exception as e:
-        logger.error(f"❌ 抓取或解析 API 資料失敗：{e}")
-        return
+    records = []
+    for api_url in [URL_MINOR, URL_MAJOR]:
+        try:
+            response = requests.get(api_url)
+            data = response.json()
+            records.extend(data['records']['Earthquake'])
+        except Exception as e:
+            logger.error(f"❌ 抓取或解析 API 資料失敗：{e}")
+    logger.info(f"✅ 成功抓取 {len(records)} 筆地震資料")
 
     count = 0
     for eq in records:

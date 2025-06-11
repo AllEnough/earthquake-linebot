@@ -77,10 +77,10 @@ def test_push():
 
 # ✅ 啟動背景服務
 if __name__ == "__main__":
-    # 每 5 分鐘抓取地震資料 + 每日圖表更新 + 每週摘要推播
+    # 每 1 分鐘抓取地震資料 + 每日圖表更新 + 每週摘要推播
     start_background_quake_import()
 
-    # 推播機制（每 5 分鐘比對地震資料，若有新資料則推播）
+    # 推播機制（每 1 分鐘比對地震資料，若有新資料則推播）
     threading.Thread(target=quake_check_loop, daemon=True).start()
 
     # 啟動 Flask 網頁服務

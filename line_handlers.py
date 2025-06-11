@@ -12,6 +12,7 @@ from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
 from geocode_utils import get_coordinates_from_text
+from quake_map import generate_static_map
 
 def normalize_tai(text: str) -> str:
     """Replace common simplified forms like '台' with '臺'."""
@@ -36,15 +37,13 @@ def handle_query_help():
         "🔹 「地震預測圖」➡️ AI 模型預測最大規模\n"
         "\n📝 文字報告：\n"
         "🔹 「地震摘要」➡️ 一週地震活動總結\n"
-        "\n⚙️ 推播設定：\n"
-        "🔹 「推播條件 [震度] [地區]」➡️ 自訂地震推播條件\n"
-        "🔹 「所在區域 [地點]」➡️ 設定個人位置以篩選推播\n"
     )
     return [TextMessage(text=text)]
 
 
 def handle_query_latest():
     latest = db["earthquakes"].find_one(sort=[("origin_time", -1)])
+    messages = []
     if latest:
         text = (
             f"📍 最新地震資訊：\n"
@@ -53,9 +52,16 @@ def handle_query_latest():
             f"深度：{latest.get('depth', '未知')} 公里\n"
             f"規模：芮氏 {latest.get('magnitude', '未知')}"
         )
+        messages.append(TextMessage(text=text))
+        if latest.get("lat") and latest.get("lon"):
+            map_path = generate_static_map(latest["lat"], latest["lon"])
+            if map_path:
+                url = f"{DOMAIN}/static/map_latest.png"
+                messages.append(ImageMessage(original_content_url=url, preview_image_url=url))
     else:
-        text = "⚠️ 查無最新地震資料。"
-    return [TextMessage(text=text)]
+        messages.append(TextMessage(text="⚠️ 查無最新地震資料。"))
+    return messages
+
 
 
 def handle_chart_daily():
@@ -86,73 +92,6 @@ def handle_summary_text():
     summary = get_text_summary(days=7)
     return [TextMessage(text=summary)]
 
-
-def handle_location_settings(user_id, user_message):
-    parts = user_message.strip().split(maxsplit=1)
-    if len(parts) == 1:
-        user = db["users"].find_one({"user_id": user_id})
-        if not user or user.get("home_lat") is None or user.get("home_lon") is None:
-            return [TextMessage(text="⚠️ 尚未設定所在區域。使用：所在區域 [地點]")]
-        lat = user.get("home_lat")
-        lon = user.get("home_lon")
-        return [TextMessage(text=f"📌 目前所在區域：{lat}, {lon}")]
-
-    if parts[1] in ["取消", "重置"]:
-        db["users"].update_one({"user_id": user_id}, {"$set": {"home_lat": None, "home_lon": None}})
-        return [TextMessage(text="✅ 已取消所在區域設定")]
-
-    location = parts[1].strip()
-    lat, lon = get_coordinates_from_text(location)
-    if lat is None or lon is None:
-        return [TextMessage(text="⚠️ 無法解析地點，請嘗試更精確的地址")]
-    db["users"].update_one({"user_id": user_id}, {"$set": {"home_lat": lat, "home_lon": lon}})
-    return [TextMessage(text="✅ 已更新所在區域")]
-
-
-def handle_push_settings(user_id, user_message):
-    parts = user_message.strip().split()
-
-    if len(parts) == 1:
-        user = db["users"].find_one({"user_id": user_id})
-        if not user:
-            return [TextMessage(text="⚠️ 無法取得使用者資料。")]
-        mag = user.get("magnitude_threshold")
-        loc = user.get("location_filter")
-        text = "📌 目前推播條件：\n"
-        if mag is not None:
-            text += f"震度門檻：{mag}\n"
-        if loc:
-            text += f"地區關鍵字：{loc}\n"
-        if mag is None and not loc:
-            text += "無（接收所有地震通知）"
-        return [TextMessage(text=text)]
-
-    if len(parts) >= 2 and parts[1] in ["取消", "重置"]:
-        db["users"].update_one(
-            {"user_id": user_id},
-            {"$set": {"magnitude_threshold": None, "location_filter": None}},
-        )
-        return [TextMessage(text="✅ 已取消推播條件，將接收所有地震通知。")]
-
-    mag = None
-    location = None
-    for p in parts[1:]:
-        try:
-            mag = float(p)
-        except ValueError:
-            location = normalize_tai(p)
-
-    update = {}
-    if mag is not None:
-        update["magnitude_threshold"] = mag
-    if location is not None:
-        update["location_filter"] = location
-
-    if update:
-        db["users"].update_one({"user_id": user_id}, {"$set": update})
-        return [TextMessage(text="✅ 推播條件已更新")]
-
-    return [TextMessage(text="⚠️ 格式錯誤，請使用：推播條件 [震度] [地區]")]
 
 
 def handle_query_custom(user_message):

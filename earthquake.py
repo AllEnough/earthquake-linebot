@@ -30,12 +30,12 @@ def quake_check_loop():
             quake = fetch_latest_quake()
             if not quake:
                 logger.warning("⚠️ 無法取得地震資料")
-                time.sleep(300)
+                time.sleep(60)
                 continue
 
             if "origin_time" not in quake:
                 logger.warning("⚠️ 地震資料缺少 origin_time，跳過")
-                time.sleep(300)
+                time.sleep(60)
                 continue
 
             if quake["origin_time"] != last_quake_time:
@@ -75,4 +75,4 @@ def quake_check_loop():
         except Exception as e:
             logger.error(f"❌ earthquake.py 主迴圈錯誤：{e}")
 
-        time.sleep(300)  # 每 5 分鐘執行一次
+        time.sleep(60)  # 每 1 分鐘執行一次

@@ -28,20 +28,6 @@ def should_push_to_user(user, quake):
     if quake is None:
         return True
 
-    mag_th = user.get("magnitude_threshold")
-    if mag_th is not None and quake.get("magnitude") is not None:
-        try:
-            if float(quake["magnitude"]) < float(mag_th):
-                return False
-        except Exception:
-            pass
-
-    loc_kw = user.get("location_filter")
-    if loc_kw:
-        epicenter = quake.get("epicenter", "")
-        if loc_kw not in epicenter:
-            return False
-
     home_lat = user.get("home_lat")
     home_lon = user.get("home_lon")
     if (
@@ -67,8 +53,6 @@ def push_messages_to_all_users(message_text, quake=None):
                 {},
                 {
                     "user_id": 1,
-                    "magnitude_threshold": 1,
-                    "location_filter": 1,
                     "home_lat": 1,
                     "home_lon": 1,
                 },
@@ -106,8 +90,6 @@ def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
                 {},
                 {
                     "user_id": 1,
-                    "magnitude_threshold": 1,
-                    "location_filter": 1,
                     "home_lat": 1,
                     "home_lon": 1,
                 },
