@@ -55,6 +55,9 @@ def get_coordinates_from_text(location_name):
     if not location_name:
         return None, None
 
+    if location_name in _geocode_cache:
+        return _geocode_cache[location_name]
+
     if location_name in manual_fix:
         lat, lon = manual_fix[location_name]
         logger.info(f"📍 已從補丁表解析地點：{location_name} → ({lat}, {lon})")
@@ -67,6 +70,7 @@ def get_coordinates_from_text(location_name):
                 )
             except Exception as e:
                 logger.error(f"⚠️ 寫入座標資料庫失敗：{e}")
+        _geocode_cache[location_name] = (lat, lon)
         return lat, lon
 
      # Check MongoDB cache

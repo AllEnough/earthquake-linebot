@@ -49,8 +49,6 @@ def handle_webhook():
                         '$setOnInsert': {
                             'user_id': user_id,
                             'joined_at': datetime.now(UTC),
-                            'home_lat': None,
-                            'home_lon': None,
                         }
                     },
                     upsert=True

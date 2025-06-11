@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # ✅ 每 1 分鐘抓資料
-def run_quake_import_loop(interval_minutes=5):
+def run_quake_import_loop(interval_minutes=1):
     while True:
         logger.info("🌀 執行定期地震資料匯入...")
         fetch_and_store_earthquake_data()

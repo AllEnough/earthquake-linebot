@@ -8,41 +8,10 @@ from linebot.v3.messaging.models import (
 from linebot.v3.messaging.exceptions import ApiException
 from config import configuration, collection
 from logger import logger
-import math
 import time
 
-def haversine_km(lat1, lon1, lat2, lon2):
-    """Calculate distance between two lat/lon points in kilometers."""
-    r = 6371.0
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    d_phi = math.radians(lat2 - lat1)
-    d_lambda = math.radians(lon2 - lon1)
-    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return r * c
-
-
 def should_push_to_user(user, quake):
-    """Return True if the quake satisfies user's custom conditions."""
-    if quake is None:
-        return True
-
-    home_lat = user.get("home_lat")
-    home_lon = user.get("home_lon")
-    if (
-        home_lat is not None
-        and home_lon is not None
-        and quake.get("lat") is not None
-        and quake.get("lon") is not None
-    ):
-        try:
-            dist = haversine_km(float(home_lat), float(home_lon), float(quake["lat"]), float(quake["lon"]))
-            if dist > 150:
-                return False
-        except Exception:
-            pass
-
+    """Return True if the quake satisfies user conditions (none for now)."""
     return True
 
 
@@ -53,8 +22,6 @@ def push_messages_to_all_users(message_text, quake=None):
                 {},
                 {
                     "user_id": 1,
-                    "home_lat": 1,
-                    "home_lon": 1,
                 },
             )
         )
@@ -90,8 +57,6 @@ def push_image_to_all_users(image_url, alt_text="地震位置圖", quake=None):
                 {},
                 {
                     "user_id": 1,
-                    "home_lat": 1,
-                    "home_lon": 1,
                 },
             )
         )

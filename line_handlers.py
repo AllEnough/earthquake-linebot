@@ -11,7 +11,6 @@ from chart_avg import generate_avg_magnitude_chart
 from chart_max import generate_max_magnitude_chart
 from quake_forecast import generate_forecast_chart
 from quake_summary import get_text_summary
-from geocode_utils import get_coordinates_from_text
 from quake_map import generate_static_map
 
 def normalize_tai(text: str) -> str:
